@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirement Tax Optimizer - Instructions</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a2332;
+            --bg-card: #1e2a3a;
+            --text-primary: #e8edf4;
+            --text-secondary: #8899a6;
+            --accent-blue: #1d9bf0;
+            --accent-green: #00ba7c;
+            --accent-amber: #f59e0b;
+            --border-color: #2f3e50;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-blue);
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-green);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-amber);
+        }
+        
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        ul, ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 1.5rem 0;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--accent-amber);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        td {
+            color: var(--text-secondary);
+        }
+        
+        .highlight {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--accent-amber);
+            padding: 12px 16px;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .tip {
+            background: rgba(0, 186, 124, 0.1);
+            border-left: 4px solid var(--accent-green);
+            padding: 12px 16px;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 10px 20px;
+            background: var(--accent-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .back-link:hover {
+            background: #1a8cd8;
+        }
+        
+        @media (max-width: 600px) {
+            body { padding: 20px 15px; }
+            h1 { font-size: 1.6rem; }
+            h2 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Retirement Tax Optimizer</h1>
+        <p class="subtitle">User Guide & Instructions</p>
+        
+        <h2>Overview</h2>
+        <p>This tool projects your retirement finances year-by-year, optimizing withdrawals across multiple account types to minimize taxes while meeting your spending needs. It models Social Security, Required Minimum Distributions (RMDs), healthcare costs, and Roth conversions. The interface features a compact input form on the left and an interactive stacked area chart on the right showing your account balances over time.</p>
+        
+        <h2>Quick Start</h2>
+        <ol>
+            <li>Enter your current account balances (left panel)</li>
+            <li>Set your age, spouse's age (if married), and life expectancy</li>
+            <li>Select your Social Security start ages (benefits auto-populate)</li>
+            <li>Adjust your annual spending need</li>
+            <li>Watch the chart update in real-time as you change inputs</li>
+            <li>Review the year-by-year projection table below</li>
+        </ol>
+        
+        <h2>The Balance Chart</h2>
+        <p>The stacked area chart on the right side of the input panel shows how your account balances and Social Security income change over time:</p>
+        <ul>
+            <li><strong style="color: #3b82f6;">Blue</strong> - Brokerage (taxable investment account)</li>
+            <li><strong style="color: #f59e0b;">Orange</strong> - Traditional 401k/IRA (pre-tax)</li>
+            <li><strong style="color: #10b981;">Green</strong> - Roth 401k/IRA (tax-free)</li>
+            <li><strong style="color: #8b5cf6;">Purple</strong> - HSA (Health Savings Account)</li>
+            <li><strong style="color: #ef4444;">Red</strong> - Annual Social Security income</li>
+        </ul>
+        <p>The chart helps you visualize:</p>
+        <ul>
+            <li>How your total portfolio grows or depletes over time</li>
+            <li>The shifting composition as you draw from different accounts</li>
+            <li>The effect of Roth conversions (401k shrinks, Roth grows)</li>
+            <li>When Social Security kicks in and how it grows with inflation</li>
+            <li>How SS income compares to your portfolio balances</li>
+            <li>When accounts become depleted</li>
+        </ul>
+        
+        <h2>Input Fields Explained</h2>
+        <p>The input panel is organized into two columns. Here's what each field means:</p>
+        
+        <h3>Accounts (Left Column)</h3>
+        <table>
+            <tr><th>Field</th><th>Description</th></tr>
+            <tr><td>Brokerage</td><td>Taxable investment account balance</td></tr>
+            <tr><td>401k</td><td>Traditional 401k/IRA balance (pre-tax)</td></tr>
+            <tr><td>Roth</td><td>Roth 401k/IRA balance (tax-free withdrawals)</td></tr>
+            <tr><td>HSA</td><td>Health Savings Account balance</td></tr>
+            <tr><td>Basis %</td><td>Cost basis as percentage of brokerage (e.g., 50% means half is gains)</td></tr>
+        </table>
+        
+        <h3>Timeline (Left Column)</h3>
+        <table>
+            <tr><th>Field</th><th>Description</th></tr>
+            <tr><td>Status</td><td>Filing status: Married or Single</td></tr>
+            <tr><td>Your Age</td><td>Your age at retirement (in the Retire Year)</td></tr>
+            <tr><td>Spouse Age</td><td>Spouse's age at retirement (married only)</td></tr>
+            <tr><td>Today Year</td><td>The current year - projection starts here with accumulation phase</td></tr>
+            <tr><td>Retire Year</td><td>Year withdrawals begin - this is when you actually retire</td></tr>
+            <tr><td>Life Exp</td><td>Your life expectancy (plan to 90+ to be safe)</td></tr>
+            <tr><td>Spouse Life</td><td>Spouse's life expectancy (married only)</td></tr>
+            <tr><td>RMD Age</td><td>When Required Minimum Distributions begin (73-75)</td></tr>
+        </table>
+        
+        <div class="tip">
+            <strong>Accumulation Phase:</strong> Between Today Year and Retire Year, your portfolio grows with market returns but no withdrawals are made. These years appear with a blue tint in the projection table. This lets you see how your portfolio might grow before retirement.
+        </div>
+        
+        <h3>Social Security (Right Column)</h3>
+        <table>
+            <tr><th>Field</th><th>Description</th></tr>
+            <tr><td>Your SS Age</td><td>Age you'll start claiming SS (62-70) - benefit shown</td></tr>
+            <tr><td>Spouse SS</td><td>Age spouse starts claiming SS (married only)</td></tr>
+        </table>
+        
+        <div class="tip">
+            <strong>Tip:</strong> Delaying SS from 62 to 70 increases benefits by ~77%. The dropdown shows the monthly benefit for each claiming age.
+        </div>
+        
+        <h3>Assumptions (Right Column)</h3>
+        <table>
+            <tr><th>Field</th><th>Description</th></tr>
+            <tr><td>Return %</td><td>Expected annual investment return (default 7%)</td></tr>
+            <tr><td>Inflation %</td><td>General inflation rate for spending/SS COLA (default 3%)</td></tr>
+            <tr><td>Brkt Infl %</td><td>Tax bracket inflation rate (default 2.5%)</td></tr>
+            <tr><td>Spending</td><td>Annual spending need in today's dollars (while both spouses alive)</td></tr>
+            <tr><td>Survivor $</td><td>Spending need after one spouse passes (in today's dollars). Typically 60-75% of couple spending. Only shown for married filers.</td></tr>
+            <tr><td>Target Brkt</td><td>Target tax bracket for withdrawals (10%, 12%, 22%, 24%)</td></tr>
+            <tr><td>State Tax %</td><td>State income tax rate (0% for TX, FL, WA, etc.)</td></tr>
+            <tr><td>Suppl Hlth</td><td>Supplemental healthcare costs (dental, vision, copays)</td></tr>
+        </table>
+        
+        <h3>Bad Sequence Modeling (Right Column)</h3>
+        <p>Model market downturns at any point to stress-test your plan:</p>
+        <table>
+            <tr><th>Field</th><th>Description</th></tr>
+            <tr><td>Bad Ret %</td><td>Return during bad years (e.g., -10% for a crash)</td></tr>
+            <tr><td>Start Year</td><td>When the bad sequence begins (0 = Today Year, counts through both accumulation and retirement)</td></tr>
+            <tr><td>Duration</td><td>How many years the bad sequence lasts</td></tr>
+        </table>
+        <div class="tip">
+            <strong>Example:</strong> If Today Year is 2025 and Retire Year is 2028, setting Start Year = 2 and Duration = 3 means bad returns in 2027, 2028, and 2029 (spanning both accumulation and early retirement).
+        </div>
+        
+        <h3>Strategy Checkboxes</h3>
+        <div class="card">
+            <div class="card-title">☑️ Use Rule of 55</div>
+            <p>If you retire after age 55, you can withdraw from your 401k without the 10% early withdrawal penalty. Keep this checked if you qualify.</p>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">☑️ Aggressive Roth Conversion</div>
+            <p>When checked, the model reserves bracket space for Roth conversions instead of filling it entirely with 401k withdrawals. This shifts money from Traditional to Roth, paying taxes now at your target rate to avoid higher taxes later (especially on RMDs).</p>
+            <p><strong>Effect:</strong> Higher conversions, faster 401k depletion, larger Roth balance over time.</p>
+        </div>
+        
+        <h3>Children on Health Insurance</h3>
+        <p>Under the ACA, children can stay on a parent's health insurance until they turn 26. The model accounts for this:</p>
+        <ul>
+            <li>Add up to 4 children with their current ages</li>
+            <li>Children are included in ACA premium calculations while eligible (under 26)</li>
+            <li>Child premiums are estimated at ~$300/month (vs ~$600 for adults)</li>
+            <li>The Federal Poverty Level (FPL) adjusts for household size, affecting subsidy eligibility</li>
+            <li>Supplemental healthcare costs also scale with children (30% per child)</li>
+            <li>Once a child turns 26, they're removed from your plan automatically</li>
+        </ul>
+        <div class="tip">
+            <strong>Tip:</strong> If you're retiring early with children still at home, their healthcare costs can significantly impact your expenses until they age out at 26.
+        </div>
+        
+        <h2>Understanding the Output Table</h2>
+        
+        <h3>Withdrawal Columns</h3>
+        <table>
+            <tr><th>Column</th><th>Meaning</th></tr>
+            <tr><td>401k W</td><td>Withdrawal from Traditional 401k/IRA</td></tr>
+            <tr><td>Brk W</td><td>Withdrawal from taxable brokerage</td></tr>
+            <tr><td>Roth W</td><td>Withdrawal from Roth (tax-free)</td></tr>
+            <tr><td>HSA W</td><td>Withdrawal from HSA (detailed view)</td></tr>
+            <tr><td>SS</td><td>Social Security income</td></tr>
+        </table>
+        
+        <h3>Tax Columns</h3>
+        <table>
+            <tr><th>Column</th><th>Meaning</th></tr>
+            <tr><td>Tax</td><td>Total federal income tax (ordinary + capital gains)</td></tr>
+            <tr><td>NIIT</td><td>Net Investment Income Tax (3.8% on investment income above $200K/$250K)</td></tr>
+            <tr><td>State</td><td>State income tax (detailed view)</td></tr>
+            <tr><td>Health</td><td>Healthcare costs (ACA premiums or Medicare + IRMAA)</td></tr>
+            <tr><td>Rate</td><td>Effective tax rate: Total Tax ÷ Gross Income</td></tr>
+        </table>
+        
+        <h3>Balance Columns</h3>
+        <table>
+            <tr><th>Column</th><th>Meaning</th></tr>
+            <tr><td>Brk Bal</td><td>Brokerage balance at year end</td></tr>
+            <tr><td>401k Bal</td><td>Traditional 401k balance at year end</td></tr>
+            <tr><td>Roth Bal</td><td>Roth balance at year end</td></tr>
+            <tr><td>Total</td><td>Combined balance of all accounts</td></tr>
+        </table>
+        
+        <h3>Detailed View Columns</h3>
+        <p>Click "Detailed View" to see additional columns:</p>
+        <ul>
+            <li><strong>Conv</strong> - Roth conversion amount</li>
+            <li><strong>SS Tax</strong> - Taxable portion of Social Security (0-85%)</li>
+            <li><strong>HSA W / HSA Bal</strong> - HSA withdrawals and balance</li>
+        </ul>
+        
+        <h2>Summary Statistics</h2>
+        <table>
+            <tr><th>Stat</th><th>Meaning</th></tr>
+            <tr><td>Lifetime Tax</td><td>Total federal taxes paid over the projection</td></tr>
+            <tr><td>Avg Tax Rate</td><td>Average effective tax rate across all years</td></tr>
+            <tr><td>Healthcare</td><td>Total healthcare costs (ACA + Medicare/IRMAA)</td></tr>
+            <tr><td>Conversions</td><td>Total amount converted from Traditional to Roth</td></tr>
+            <tr><td>Final Balance</td><td>Combined account balance at end of projection</td></tr>
+            <tr><td>Years</td><td>Number of years in the projection</td></tr>
+        </table>
+        
+        <h2>Withdrawal Strategy Logic</h2>
+        <p>The model follows this priority to minimize taxes while meeting spending needs:</p>
+        <ol>
+            <li><strong>401k withdrawals</strong> - Fill up to target tax bracket (minus room reserved for conversions)</li>
+            <li><strong>Brokerage withdrawals</strong> - Harvest gains in the 0% LTCG bracket</li>
+            <li><strong>Roth withdrawals</strong> - Tax-free, used to cover any shortfall</li>
+            <li><strong>HSA withdrawals</strong> - Tax-free for medical (or any purpose after 65)</li>
+            <li><strong>Additional brokerage</strong> - If still short, pull more (with LTCG tax)</li>
+            <li><strong>Additional 401k</strong> - Last resort, even if it pushes into higher bracket</li>
+        </ol>
+        
+        <div class="warning">
+            <strong>Shortfall Alert:</strong> If the red "Funding Shortfall Detected" warning appears, your plan cannot meet spending needs in some years. Consider reducing spending, delaying retirement, or increasing savings.
+        </div>
+        
+        <h2>Stress Testing Your Plan</h2>
+        
+        <h3>Sequence of Returns Risk</h3>
+        <p>A market crash early in retirement is more damaging than one later. To test this:</p>
+        <ol>
+            <li>Set <code>Bad Ret %</code> to a negative number (e.g., -10% or -20%)</li>
+            <li>Set <code>Start Year</code> to when you want the crash to occur (0 = first year)</li>
+            <li>Set <code>Duration</code> to 2-5 years</li>
+            <li>Check if your plan still works (no shortfalls, reasonable final balance)</li>
+        </ol>
+        
+        <h3>Test Different Crash Timings</h3>
+        <p>Try these scenarios to understand your plan's resilience:</p>
+        <ul>
+            <li><strong>Early crash:</strong> Start Year = 0, Duration = 3 (worst case - depletes assets early)</li>
+            <li><strong>Mid-retirement crash:</strong> Start Year = 10, Duration = 3</li>
+            <li><strong>Late crash:</strong> Start Year = 20, Duration = 3 (usually less impactful)</li>
+        </ul>
+        
+        <h3>Single Filer Scenario</h3>
+        <p>To see what happens if one spouse passes away, switch to "Single" filing status. This shows the surviving spouse's situation with:</p>
+        <ul>
+            <li>Single tax brackets (narrower, higher rates sooner)</li>
+            <li>Lower standard deduction</li>
+            <li>Only one person's Social Security</li>
+        </ul>
+        
+        <h2>Tax Rules Modeled</h2>
+        <ul>
+            <li><strong>Federal tax brackets</strong> - 2024 brackets, inflation-adjusted</li>
+            <li><strong>Standard deduction</strong> - Including $1,550-$1,950 bonus per person 65+</li>
+            <li><strong>Social Security taxation</strong> - Proper 0%/50%/85% brackets based on provisional income</li>
+            <li><strong>Long-term capital gains</strong> - 0%/15%/20% brackets</li>
+            <li><strong>NIIT</strong> - 3.8% on investment income above $200K (single) / $250K (married) - NOT inflation-indexed</li>
+            <li><strong>Early withdrawal penalty</strong> - 10% before age 59½ (waived with Rule of 55)</li>
+            <li><strong>RMDs</strong> - Required Minimum Distributions using IRS Uniform Lifetime Table</li>
+            <li><strong>IRMAA</strong> - Medicare premium surcharges for high-income retirees (with 2-year lookback)</li>
+        </ul>
+        
+        <h2>IRMAA 2-Year Lookback</h2>
+        <p>Medicare IRMAA (Income-Related Monthly Adjustment Amount) surcharges are based on your income from <strong>2 years prior</strong>. The model now accounts for this:</p>
+        <ul>
+            <li>A large Roth conversion in 2026 affects your Medicare premiums in 2028</li>
+            <li>The model tracks MAGI history and uses the appropriate year for IRMAA calculations</li>
+            <li>For the first 2 years of retirement, current-year MAGI is used as an estimate</li>
+            <li>Roth conversions are included in MAGI (they increase your income for IRMAA purposes)</li>
+        </ul>
+        <div class="tip">
+            <strong>Planning Tip:</strong> If you're 63-64 and planning large Roth conversions, be aware that IRMAA surcharges will hit when you turn 65 and enroll in Medicare.
+        </div>
+        
+        <h2>Roth Conversion Sweet Spot Finder</h2>
+        <p>Click the "🎯 Roth Sweet Spot" button to see an analysis of optimal Roth conversion amounts for Year 1 of your retirement.</p>
+        
+        <h3>What It Shows</h3>
+        <ul>
+            <li><strong>Current Taxable Income</strong> - Your base taxable income before any additional conversions</li>
+            <li><strong>Current Conversion</strong> - What the model is currently converting in Year 1</li>
+            <li><strong>Recommended Sweet Spot</strong> - The optimal conversion amount with reasoning</li>
+            <li><strong>Room to 12%/22%</strong> - How much you can convert before hitting each tax bracket</li>
+            <li><strong>Room to IRMAA</strong> - How much before triggering Medicare surcharges (relevant if you're 63+)</li>
+            <li><strong>Tax by Conversion chart</strong> - Visual showing how tax increases with conversion amount</li>
+        </ul>
+        
+        <h3>How to Use the Sweet Spot Number</h3>
+        <p>The sweet spot is a <strong>suggestion</strong>, not what the model is currently doing:</p>
+        <ul>
+            <li><strong>If Sweet Spot > Current:</strong> You could convert more. Consider enabling "Aggressive Roth Conversion" or manually planning larger conversions.</li>
+            <li><strong>If Sweet Spot ≈ Current:</strong> The model is already optimizing well for your situation.</li>
+            <li><strong>If Sweet Spot = $0:</strong> You're already in a high tax bracket - not a good year to convert.</li>
+        </ul>
+        
+        <h3>Why Convert to Roth?</h3>
+        <p>The trade-off is: pay taxes NOW at your current rate to avoid taxes LATER when RMDs may push you into higher brackets. This is especially valuable if:</p>
+        <ul>
+            <li>You're in a low-income year (before SS starts)</li>
+            <li>You expect tax rates to rise in the future</li>
+            <li>You want to leave tax-free money to heirs</li>
+            <li>You want to reduce future RMD amounts</li>
+        </ul>
+        
+        <h2>HSA Withdrawal Rules</h2>
+        <p>The model follows IRS rules for HSA withdrawals:</p>
+        <ul>
+            <li><strong>Any age:</strong> HSA can be used tax-free for qualified medical expenses (copays, dental, vision, prescriptions)</li>
+            <li><strong>Before 65:</strong> Only used up to qualified medical costs to avoid 20% penalty</li>
+            <li><strong>Age 65+:</strong> Can use for any purpose (medical = tax-free, non-medical = taxed like IRA, no penalty)</li>
+            <li><strong>Medicare premiums:</strong> Base Medicare Parts A, B, D premiums are HSA-eligible after 65</li>
+            <li><strong>NOT HSA-eligible:</strong> ACA premiums, Medigap/supplemental insurance, IRMAA surcharges</li>
+        </ul>
+        
+        <h2>📊 Guardrails Analysis</h2>
+        <p>The Guardrails panel shows dynamic spending recommendations based on the Guyton-Klinger guardrails strategy:</p>
+        <table>
+            <tr><th>Withdrawal Rate</th><th>Action</th></tr>
+            <tr><td>Below 4% (floor)</td><td>You can safely increase spending by 10% - portfolio is doing well</td></tr>
+            <tr><td>4% - 6% (safe zone)</td><td>No adjustment needed - spending is sustainable</td></tr>
+            <tr><td>Above 6% (ceiling)</td><td>Reduce spending by 10% to protect portfolio longevity</td></tr>
+        </table>
+        <p>The panel shows:</p>
+        <ul>
+            <li>Current withdrawal rate from your portfolio</li>
+            <li>Visual gauge showing where you are relative to guardrails</li>
+            <li>Spending ranges at different portfolio levels (-40% to +40%)</li>
+        </ul>
+        <div class="tip">
+            <strong>How to use:</strong> Recalculate annually using your actual portfolio value. Adjust spending up or down based on the guardrail recommendations.
+        </div>
+        
+        <h2>🎲 Monte Carlo Simulation</h2>
+        <p>The Monte Carlo simulation tests your plan against thousands of random market scenarios using log-normal returns (which naturally model the upward bias of stocks).</p>
+        
+        <h3>Parameters</h3>
+        <table>
+            <tr><th>Field</th><th>Description</th></tr>
+            <tr><td>Mean Return %</td><td>Expected average annual return (default 7%)</td></tr>
+            <tr><td>Std Dev (σ) %</td><td>Volatility / standard deviation of returns (default 15%)</td></tr>
+            <tr><td>Success Target $</td><td>Minimum final balance to count as "success" (default $1,000,000)</td></tr>
+            <tr><td>Simulations</td><td>Number of random scenarios to run (100 to 10,000)</td></tr>
+            <tr><td>Use Guardrails</td><td>Apply dynamic spending adjustments during simulation</td></tr>
+        </table>
+        
+        <h3>Success Rate Thresholds</h3>
+        <table>
+            <tr><th>Rate</th><th>Assessment</th><th>Interpretation</th></tr>
+            <tr><td style="color: #10b981;">≥80%</td><td>Go ahead</td><td>High probability of success - you can adapt if needed</td></tr>
+            <tr><td style="color: #f59e0b;">65-80%</td><td>Proceed with flexibility</td><td>Workable if you're willing to adjust spending in bad years</td></tr>
+            <tr><td style="color: #ef4444;">&lt;65%</td><td>Consider adjustments</td><td>May need to reduce spending, delay retirement, or save more</td></tr>
+        </table>
+        
+        <h3>Using Guardrails in Monte Carlo</h3>
+        <p>When "Use Guardrails" is checked, the simulation applies dynamic spending adjustments each year:</p>
+        <ul>
+            <li>If withdrawal rate exceeds 6%, spending is reduced by 10%</li>
+            <li>If withdrawal rate drops below 4%, spending is increased by 10% (unless "Do Not Increase" is checked)</li>
+            <li>Adjustments accumulate over time</li>
+        </ul>
+        
+        <h4>Guardrails Control Options</h4>
+        <ul>
+            <li><strong>Do Not Increase:</strong> Spending only decreases in bad years, never increases in good years (more conservative)</li>
+            <li><strong>Auto Calculate Spending:</strong> Uses automatic logic (can decrease to 50%, increase to 150% of original). When unchecked, you can set a custom "Max Decrease %" to limit how far spending can drop (e.g., 20% means spending won't go below 80% of original)</li>
+        </ul>
+        
+        <h4>Guardrails Impact Statistics</h4>
+        <p>When guardrails are enabled, these stats help you understand their effect:</p>
+        <ul>
+            <li><strong>Avg years reduced:</strong> Average number of years spending was cut across all simulations</li>
+            <li><strong>Avg years increased:</strong> Average number of years spending was raised (will be 0 if "Do Not Increase" is checked)</li>
+            <li><strong>Avg min spending:</strong> Average lowest spending level reached (as % of original). Example: 85% means on average, simulations bottomed out at 85% of planned spending.</li>
+            <li><strong>Worst case:</strong> The absolute lowest spending level that occurred in ANY simulation (your "stress test" number). This represents the nightmare scenario - typically an early retirement bear market with slow recovery. Example: If worst case shows 65%, it means in the most severe 0.1% of outcomes, spending dropped to 65% of original. Ask yourself: "Could I survive on 65% of my planned spending?" If not, consider using manual mode with a smaller "Max Decrease %" (like 20%) or planning more conservative initial withdrawal rates.</li>
+        </ul>
+        <div class="tip">
+            <strong>Tip:</strong> Run the simulation both with and without guardrails. You'll typically see higher success rates with guardrails, but at the cost of potential spending cuts during bad markets. This tradeoff is the real value of the guardrails approach. The "Worst case" stat shows you the deepest cut you might face - use it to stress-test whether your plan has enough cushion.
+        </div>
+        
+        <h2>Limitations & Disclaimers</h2>
+        <div class="warning">
+            <strong>Important:</strong> This tool is for educational and planning purposes only. It is not financial, tax, or legal advice. Consult a qualified financial advisor and tax professional before making retirement decisions.
+        </div>
+        
+        <p>The model does not account for:</p>
+        <ul>
+            <li>Pension income or annuities</li>
+            <li>Rental income or other passive income</li>
+            <li>Part-time work in retirement</li>
+            <li>Tax loss harvesting</li>
+            <li>Qualified Charitable Distributions (QCDs)</li>
+            <li>Estate planning / inheritance</li>
+            <li>State-specific tax rules (uses flat rate)</li>
+            <li>Alternative Minimum Tax (AMT)</li>
+            <li>Roth 5-year rule for conversions</li>
+            <li>SS earnings test (if working before full retirement age)</li>
+            <li>Changes to tax law</li>
+        </ul>
+        
+        <h2>Tips for Best Results</h2>
+        <div class="tip">
+            <ul>
+                <li>Use conservative assumptions (lower returns, higher inflation)</li>
+                <li>Plan to age 95+ to avoid outliving your money</li>
+                <li>Set Today Year to the current year and Retire Year to your target retirement date to see accumulation growth</li>
+                <li>Test the "bad sequence" scenario at different points (during accumulation and early retirement are worst)</li>
+                <li>Use the Roth Sweet Spot finder to optimize conversions</li>
+                <li>Compare aggressive vs. conservative Roth conversion strategies</li>
+                <li>If you're 63+, watch IRMAA thresholds when planning conversions</li>
+                <li>Run Monte Carlo with AND without guardrails to understand the tradeoff</li>
+                <li>A 70-80% Monte Carlo success rate is reasonable if you're flexible with spending</li>
+                <li>Review and update your plan annually</li>
+            </ul>
+        </div>
+        
+        <button class="back-link" onclick="window.close()">Close Instructions</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,2866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirement Tax Optimization Planner</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a2332;
+            --bg-tertiary: #243147;
+            --bg-card: #1e2a3a;
+            --text-primary: #e8edf4;
+            --text-secondary: #8899a6;
+            --text-muted: #5c6e7e;
+            --accent-blue: #1d9bf0;
+            --accent-green: #00ba7c;
+            --accent-amber: #f59e0b;
+            --accent-red: #f4212e;
+            --accent-purple: #7856ff;
+            --border-color: #2f3e50;
+            --input-bg: #0d1117;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        input[type="number"], select {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        /* Compact inputs for the form panel */
+        .compact-input {
+            padding: 4px 8px !important;
+            font-size: 12px !important;
+        }
+        
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.15);
+        }
+        
+        input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
+        
+        button {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+        .btn-primary:hover { background: #1a8cd8; transform: translateY(-1px); }
+        
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover { background: var(--border-color); }
+        
+        .btn-success {
+            background: var(--accent-green);
+            color: white;
+        }
+        .btn-success:hover { background: #00a36c; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        th, td {
+            padding: 10px 8px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        th:first-child, td:first-child { text-align: left; }
+        
+        tr:hover td { background: rgba(29, 155, 240, 0.05); }
+        
+        .negative { color: var(--accent-red); }
+        .positive { color: var(--accent-green); }
+        .warning { color: var(--accent-amber); }
+        
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+        
+        .tooltip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 100;
+            border: 1px solid var(--border-color);
+        }
+        
+        .tooltip:hover::after { opacity: 1; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+        
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab-active {
+            background: var(--accent-blue) !important;
+            color: white !important;
+        }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useMemo, useCallback } = React;
+        
+        // ============ INPUT COMPONENTS (defined outside to prevent re-renders) ============
+        const InputField = ({ label, field, step = 1, min, max, tooltip, value, onChange, width = 'w-full' }) => (
+            <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-400 whitespace-nowrap min-w-0 flex-shrink-0">
+                    {label}
+                    {tooltip && <span className="tooltip ml-1" data-tip={tooltip}>ⓘ</span>}
+                </label>
+                <input
+                    type="number"
+                    step={step}
+                    min={min}
+                    max={max}
+                    value={value}
+                    onChange={(e) => onChange(field, e.target.value)}
+                    className={width}
+                />
+            </div>
+        );
+        
+        const CheckboxField = ({ label, field, tooltip, checked, onChange }) => (
+            <div className="flex items-center gap-2">
+                <input
+                    type="checkbox"
+                    id={field}
+                    checked={checked}
+                    onChange={(e) => onChange(field, e.target.checked)}
+                    className="w-4 h-4 rounded"
+                />
+                <label htmlFor={field} className="text-sm text-gray-300">
+                    {label}
+                    {tooltip && <span className="tooltip ml-1" data-tip={tooltip}>ⓘ</span>}
+                </label>
+            </div>
+        );
+        
+        // Stacked Area Chart Component for account balances
+        const BalanceChart = ({ data }) => {
+            if (!data || data.length === 0) return null;
+            
+            const width = 500;
+            const height = 320;
+            const padding = { top: 20, right: 20, bottom: 40, left: 60 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            
+            // Calculate max total (balances + SS) for Y scale
+            const maxTotal = Math.max(...data.map(d => d.totalBalance + d.ss));
+            const yScale = chartHeight / maxTotal;
+            
+            // X scale
+            const xScale = chartWidth / (data.length - 1 || 1);
+            
+            // Build cumulative data for stacking (bottom to top: SS, HSA, Roth, 401k, Brokerage)
+            const ssData = data.map(d => d.ss);
+            const hsaData = data.map((d, i) => d.hsaEnd + ssData[i]);
+            const rothData = data.map((d, i) => d.rothEnd + hsaData[i]);
+            const t401kData = data.map((d, i) => d.t401kEnd + rothData[i]);
+            const brkData = data.map((d, i) => d.brkEnd + t401kData[i]);
+            
+            // Create area paths
+            const createAreaPath = (upperData, lowerData = null) => {
+                const upper = upperData.map((y, i) => 
+                    `${padding.left + i * xScale},${padding.top + chartHeight - y * yScale}`
+                ).join(' L ');
+                
+                const lower = lowerData 
+                    ? [...lowerData].reverse().map((y, i) => 
+                        `${padding.left + (data.length - 1 - i) * xScale},${padding.top + chartHeight - y * yScale}`
+                      ).join(' L ')
+                    : `${padding.left + (data.length - 1) * xScale},${padding.top + chartHeight} L ${padding.left},${padding.top + chartHeight}`;
+                
+                return `M ${upper} L ${lower} Z`;
+            };
+            
+            // Y-axis ticks
+            const yTicks = [0, 0.25, 0.5, 0.75, 1].map(pct => ({
+                value: maxTotal * pct,
+                y: padding.top + chartHeight - chartHeight * pct
+            }));
+            
+            // X-axis ticks (every 5 years)
+            const xTicks = data.filter((d, i) => i % 5 === 0 || i === data.length - 1).map((d, idx, arr) => {
+                const i = data.indexOf(d);
+                return { year: d.year, x: padding.left + i * xScale };
+            });
+            
+            const formatMillions = (val) => {
+                if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
+                if (val >= 1000) return `$${(val / 1000).toFixed(0)}K`;
+                return `$${val}`;
+            };
+            
+            return (
+                <div className="bg-gray-900/50 rounded-lg p-3">
+                    <div style={{color: 'white', fontSize: '14px', fontWeight: '600', marginBottom: '8px'}}>Account Balances + Annual SS</div>
+                    <svg width={width} height={height} className="overflow-visible">
+                        {/* Grid lines */}
+                        {yTicks.map((tick, i) => (
+                            <line key={i} x1={padding.left} y1={tick.y} x2={width - padding.right} y2={tick.y} 
+                                  stroke="#374151" strokeWidth="1" strokeDasharray="4,4" />
+                        ))}
+                        
+                        {/* Stacked areas (bottom to top: SS, HSA, Roth, 401k, Brokerage) */}
+                        <path d={createAreaPath(brkData, t401kData)} fill="#3b82f6" opacity="0.8" />
+                        <path d={createAreaPath(t401kData, rothData)} fill="#f59e0b" opacity="0.8" />
+                        <path d={createAreaPath(rothData, hsaData)} fill="#10b981" opacity="0.8" />
+                        <path d={createAreaPath(hsaData, ssData)} fill="#8b5cf6" opacity="0.8" />
+                        <path d={createAreaPath(ssData)} fill="#ef4444" opacity="0.8" />
+                        
+                        {/* Y-axis labels */}
+                        {yTicks.map((tick, i) => (
+                            <text key={i} x={padding.left - 8} y={tick.y + 4} 
+                                  textAnchor="end" style={{fontSize: '11px', fill: 'white'}}>
+                                {formatMillions(tick.value)}
+                            </text>
+                        ))}
+                        
+                        {/* X-axis labels */}
+                        {xTicks.map((tick, i) => (
+                            <text key={i} x={tick.x} y={height - 10} 
+                                  textAnchor="middle" style={{fontSize: '11px', fill: 'white'}}>
+                                {tick.year}
+                            </text>
+                        ))}
+                        
+                        {/* Axes */}
+                        <line x1={padding.left} y1={padding.top} x2={padding.left} y2={padding.top + chartHeight} 
+                              stroke="#4b5563" strokeWidth="1" />
+                        <line x1={padding.left} y1={padding.top + chartHeight} x2={width - padding.right} y2={padding.top + chartHeight} 
+                              stroke="#4b5563" strokeWidth="1" />
+                    </svg>
+                    
+                    {/* Legend - aligned under chart area */}
+                    <div style={{display: 'flex', justifyContent: 'flex-start', gap: '16px', marginTop: '8px', marginLeft: `${padding.left}px`, fontSize: '11px', flexWrap: 'wrap'}}>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                            <div style={{width: '12px', height: '12px', borderRadius: '2px', backgroundColor: '#ef4444'}}></div>
+                            <span style={{color: 'white'}}>SS/year</span>
+                        </div>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                            <div style={{width: '12px', height: '12px', borderRadius: '2px', backgroundColor: '#8b5cf6'}}></div>
+                            <span style={{color: 'white'}}>HSA</span>
+                        </div>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                            <div style={{width: '12px', height: '12px', borderRadius: '2px', backgroundColor: '#10b981'}}></div>
+                            <span style={{color: 'white'}}>Roth</span>
+                        </div>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                            <div style={{width: '12px', height: '12px', borderRadius: '2px', backgroundColor: '#f59e0b'}}></div>
+                            <span style={{color: 'white'}}>401k</span>
+                        </div>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                            <div style={{width: '12px', height: '12px', borderRadius: '2px', backgroundColor: '#3b82f6'}}></div>
+                            <span style={{color: 'white'}}>Brokerage</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        // ============ SOCIAL SECURITY BENEFIT TABLES ============
+        const SS_BENEFITS_YOU = {
+            62: 2785, 63: 3012, 64: 3231, 65: 3519, 66: 3808, 
+            67: 4095, 68: 4273, 69: 4617, 70: 5129
+        };
+        
+        const SS_BENEFITS_SPOUSE = {
+            62: 1785, 63: 2012, 64: 2231, 65: 2519, 66: 2808,
+            67: 3095, 68: 3273, 69: 3617, 70: 4129
+        };
+        
+        // Helper to get closest age in table
+        const getClosestSSAge = (age, table) => {
+            const ages = Object.keys(table).map(Number);
+            if (age <= ages[0]) return ages[0];
+            if (age >= ages[ages.length - 1]) return ages[ages.length - 1];
+            return ages.reduce((prev, curr) => 
+                Math.abs(curr - age) < Math.abs(prev - age) ? curr : prev
+            );
+        };
+        
+        // Helper to find age for a given benefit amount (closest match)
+        const getAgeForBenefit = (amount, table) => {
+            const entries = Object.entries(table);
+            let closest = entries[0];
+            for (const [age, benefit] of entries) {
+                if (Math.abs(benefit - amount) < Math.abs(closest[1] - amount)) {
+                    closest = [age, benefit];
+                }
+            }
+            return Number(closest[0]);
+        };
+        
+        // ============ TAX CONSTANTS ============
+        // 2024 tax brackets (base year for inflation adjustments)
+        const TAX_BRACKETS_2024 = {
+            married: [
+                { limit: 23200, rate: 0.10 },
+                { limit: 94300, rate: 0.12 },
+                { limit: 201050, rate: 0.22 },
+                { limit: 383900, rate: 0.24 },
+                { limit: 487450, rate: 0.32 },
+                { limit: 731200, rate: 0.35 },
+                { limit: Infinity, rate: 0.37 }
+            ],
+            single: [
+                { limit: 11600, rate: 0.10 },
+                { limit: 47150, rate: 0.12 },
+                { limit: 100525, rate: 0.22 },
+                { limit: 191950, rate: 0.24 },
+                { limit: 243725, rate: 0.32 },
+                { limit: 609350, rate: 0.35 },
+                { limit: Infinity, rate: 0.37 }
+            ]
+        };
+        
+        // NIIT thresholds - NOT inflation indexed by law
+        const NIIT_THRESHOLD = { married: 250000, single: 200000 };
+        
+        // SS taxation thresholds (provisional income) - NOT inflation indexed
+        const SS_TAX_THRESHOLDS = {
+            married: { lower: 32000, upper: 44000 },
+            single: { lower: 25000, upper: 34000 }
+        };
+        
+        // Standard deduction 2024 base
+        const STD_DEDUCTION_2024 = { married: 29200, single: 14600 };
+        const STD_DEDUCTION_65_BONUS = { married: 1550, single: 1950 }; // per person 65+
+        
+        // LTCG thresholds 2024
+        const LTCG_0_THRESHOLD_2024 = { married: 94050, single: 47025 };
+        const LTCG_15_THRESHOLD_2024 = { married: 583750, single: 518900 };
+        
+        // RMD table (Uniform Lifetime Table)
+        const RMD_TABLE = {
+            72: 27.4, 73: 26.5, 74: 25.5, 75: 24.6, 76: 23.7, 77: 22.9, 78: 22.0, 79: 21.1,
+            80: 20.2, 81: 19.4, 82: 18.5, 83: 17.7, 84: 16.8, 85: 16.0, 86: 15.2, 87: 14.4,
+            88: 13.7, 89: 12.9, 90: 12.2, 91: 11.5, 92: 10.8, 93: 10.1, 94: 9.5, 95: 8.9,
+            96: 8.4, 97: 7.8, 98: 7.3, 99: 6.8, 100: 6.4
+        };
+        
+        // ============ HELPER FUNCTIONS ============
+        const formatCurrency = (val, compact = false) => {
+            if (val === undefined || val === null || isNaN(val)) return '$0';
+            if (compact && Math.abs(val) >= 1000000) {
+                return '$' + (val / 1000000).toFixed(2) + 'M';
+            }
+            if (compact && Math.abs(val) >= 1000) {
+                return '$' + (val / 1000).toFixed(0) + 'K';
+            }
+            return '$' + Math.round(val).toLocaleString();
+        };
+        
+        const formatPercent = (val) => (val * 100).toFixed(1) + '%';
+        
+        // ============ TAX CALCULATION FUNCTIONS ============
+        const getTaxBrackets = (year, isMarried, taxInflation) => {
+            const baseYear = 2024;
+            const yearsFromBase = year - baseYear;
+            const inf = Math.pow(1 + taxInflation / 100, yearsFromBase);
+            const brackets = isMarried ? TAX_BRACKETS_2024.married : TAX_BRACKETS_2024.single;
+            
+            return brackets.map(b => ({
+                limit: b.limit === Infinity ? Infinity : Math.round(b.limit * inf),
+                rate: b.rate
+            }));
+        };
+        
+        const getStandardDeduction = (year, isMarried, age1, age2, taxInflation) => {
+            const baseYear = 2024;
+            const yearsFromBase = year - baseYear;
+            const inf = Math.pow(1 + taxInflation / 100, yearsFromBase);
+            
+            let base = isMarried ? STD_DEDUCTION_2024.married : STD_DEDUCTION_2024.single;
+            let bonus = 0;
+            
+            // Add bonus for each person 65+
+            if (age1 >= 65) {
+                bonus += isMarried ? STD_DEDUCTION_65_BONUS.married : STD_DEDUCTION_65_BONUS.single;
+            }
+            if (isMarried && age2 >= 65) {
+                bonus += STD_DEDUCTION_65_BONUS.married;
+            }
+            
+            return Math.round((base + bonus) * inf);
+        };
+        
+        const getLTCGThresholds = (year, isMarried, taxInflation) => {
+            const baseYear = 2024;
+            const yearsFromBase = year - baseYear;
+            const inf = Math.pow(1 + taxInflation / 100, yearsFromBase);
+            
+            return {
+                zero: Math.round((isMarried ? LTCG_0_THRESHOLD_2024.married : LTCG_0_THRESHOLD_2024.single) * inf),
+                fifteen: Math.round((isMarried ? LTCG_15_THRESHOLD_2024.married : LTCG_15_THRESHOLD_2024.single) * inf)
+            };
+        };
+        
+        // Calculate taxable portion of Social Security (0%, 50%, or up to 85%)
+        const getSSATaxableAmount = (ssIncome, otherIncome, isMarried) => {
+            if (ssIncome <= 0) return 0;
+            
+            // Provisional income = other income + 50% of SS
+            const provisionalIncome = otherIncome + (ssIncome * 0.5);
+            const thresholds = isMarried ? SS_TAX_THRESHOLDS.married : SS_TAX_THRESHOLDS.single;
+            
+            if (provisionalIncome <= thresholds.lower) {
+                return 0; // 0% taxable
+            } else if (provisionalIncome <= thresholds.upper) {
+                // 50% of excess over lower threshold, but max 50% of SS
+                const taxable = Math.min(
+                    (provisionalIncome - thresholds.lower) * 0.5,
+                    ssIncome * 0.5
+                );
+                return Math.max(0, taxable);
+            } else {
+                // Complex formula for 85% tier
+                const tier1 = (thresholds.upper - thresholds.lower) * 0.5;
+                const tier2 = (provisionalIncome - thresholds.upper) * 0.85;
+                const taxable = Math.min(tier1 + tier2, ssIncome * 0.85);
+                return Math.max(0, taxable);
+            }
+        };
+        
+        const calculateOrdinaryTax = (taxableIncome, year, isMarried, taxInflation) => {
+            if (taxableIncome <= 0) return 0;
+            
+            const brackets = getTaxBrackets(year, isMarried, taxInflation);
+            let tax = 0;
+            let prevLimit = 0;
+            
+            for (const bracket of brackets) {
+                const incomeInBracket = Math.min(taxableIncome, bracket.limit) - prevLimit;
+                if (incomeInBracket > 0) {
+                    tax += incomeInBracket * bracket.rate;
+                }
+                prevLimit = bracket.limit;
+                if (taxableIncome <= bracket.limit) break;
+            }
+            
+            return tax;
+        };
+        
+        const calculateLTCGTax = (ltcg, taxableOrdinaryIncome, year, isMarried, taxInflation) => {
+            if (ltcg <= 0) return 0;
+            
+            const thresholds = getLTCGThresholds(year, isMarried, taxInflation);
+            const totalIncome = taxableOrdinaryIncome + ltcg;
+            
+            let tax = 0;
+            
+            if (totalIncome <= thresholds.zero) {
+                // All LTCG at 0%
+                tax = 0;
+            } else if (taxableOrdinaryIncome >= thresholds.fifteen) {
+                // All LTCG at 20%
+                tax = ltcg * 0.20;
+            } else if (taxableOrdinaryIncome >= thresholds.zero) {
+                // LTCG split between 15% and possibly 20%
+                const at15 = Math.min(ltcg, thresholds.fifteen - taxableOrdinaryIncome);
+                const at20 = Math.max(0, ltcg - at15);
+                tax = at15 * 0.15 + at20 * 0.20;
+            } else {
+                // Some at 0%, some at 15%, possibly some at 20%
+                const at0 = Math.min(ltcg, thresholds.zero - taxableOrdinaryIncome);
+                const remaining = ltcg - at0;
+                const at15 = Math.min(remaining, thresholds.fifteen - thresholds.zero);
+                const at20 = Math.max(0, remaining - at15);
+                tax = at15 * 0.15 + at20 * 0.20;
+            }
+            
+            return tax;
+        };
+        
+        // NIIT - thresholds are NOT inflation indexed
+        const calculateNIIT = (magi, investmentIncome, isMarried) => {
+            const threshold = isMarried ? NIIT_THRESHOLD.married : NIIT_THRESHOLD.single;
+            if (magi <= threshold) return 0;
+            return Math.min(investmentIncome, magi - threshold) * 0.038;
+        };
+        
+        // Early withdrawal penalty (before 59.5)
+        const calculateEarlyWithdrawalPenalty = (withdrawal, age, useRule55) => {
+            if (age >= 59.5) return 0;
+            if (useRule55 && age >= 55) return 0; // Rule of 55 exception
+            return withdrawal * 0.10;
+        };
+        
+        // RMD calculation
+        const calculateRMD = (balance, age, rmdStartAge) => {
+            if (age < rmdStartAge || balance <= 0) return 0;
+            const divisor = RMD_TABLE[Math.min(age, 100)] || 6.4;
+            return balance / divisor;
+        };
+        
+        // ACA premium estimation - returns detailed breakdown
+        // numAdults: number of adults on plan (1 or 2)
+        // numChildren: number of children under 26 on plan
+        const calculateACAHealthcare = (magi, year, generalInflation, numAdults = 2, numChildren = 0) => {
+            const baseYear = 2024;
+            const yearsFromBase = year - baseYear;
+            const inf = Math.pow(1 + generalInflation / 100, yearsFromBase);
+            
+            // FPL varies by household size (2024 values for continental US)
+            // 1 person: $14,580, 2: $19,720, 3: $24,860, 4: $30,000, etc. (+$5,140 per person)
+            const householdSize = numAdults + numChildren;
+            const fplBase = 14580 + (householdSize - 1) * 5140;
+            const fpl = fplBase * inf;
+            const fplPercent = magi / fpl;
+            
+            // Base premium per person (silver plan benchmark estimate)
+            // Adults: ~$600/month, Children: ~$300/month (roughly half)
+            const adultPremium = 600 * inf * 12 * numAdults;
+            const childPremium = 300 * inf * 12 * numChildren;
+            const basePremium = adultPremium + childPremium;
+            
+            // ACA subsidy phases out at 400% FPL (extended under ARP, may change)
+            let cost, subsidyPct;
+            if (fplPercent <= 1.5) { cost = basePremium * 0.02; subsidyPct = 98; }
+            else if (fplPercent <= 2.0) { cost = basePremium * 0.04; subsidyPct = 96; }
+            else if (fplPercent <= 2.5) { cost = basePremium * 0.06; subsidyPct = 94; }
+            else if (fplPercent <= 3.0) { cost = basePremium * 0.085; subsidyPct = 91.5; }
+            else if (fplPercent <= 4.0) { cost = Math.min(basePremium, magi * 0.085); subsidyPct = Math.round((1 - cost/basePremium) * 100); }
+            else { cost = basePremium; subsidyPct = 0; }
+            
+            return {
+                total: cost,
+                basePremium,
+                fplPercent: Math.round(fplPercent * 100),
+                subsidyPct,
+                householdSize,
+                numChildren
+            };
+        };
+        
+        // IRMAA calculation - returns detailed breakdown with tier info
+        const calculateIRMAA = (magi, year, isMarried, generalInflation) => {
+            const baseYear = 2024;
+            const yearsFromBase = year - baseYear;
+            const inf = Math.pow(1 + generalInflation / 100, yearsFromBase);
+            
+            // 2024 base Part B premium
+            const basePremium = 174.70 * inf;
+            
+            // IRMAA thresholds (these ARE inflation-indexed)
+            const tiers = isMarried ? [
+                { limit: 206000 * inf, surcharge: 0, tier: 0, label: 'None' },
+                { limit: 258000 * inf, surcharge: 69.90 * inf, tier: 1, label: 'Tier 1' },
+                { limit: 322000 * inf, surcharge: 174.70 * inf, tier: 2, label: 'Tier 2' },
+                { limit: 386000 * inf, surcharge: 279.50 * inf, tier: 3, label: 'Tier 3' },
+                { limit: 750000 * inf, surcharge: 384.30 * inf, tier: 4, label: 'Tier 4' },
+                { limit: Infinity, surcharge: 419.30 * inf, tier: 5, label: 'Tier 5' }
+            ] : [
+                { limit: 103000 * inf, surcharge: 0, tier: 0, label: 'None' },
+                { limit: 129000 * inf, surcharge: 69.90 * inf, tier: 1, label: 'Tier 1' },
+                { limit: 161000 * inf, surcharge: 174.70 * inf, tier: 2, label: 'Tier 2' },
+                { limit: 193000 * inf, surcharge: 279.50 * inf, tier: 3, label: 'Tier 3' },
+                { limit: 500000 * inf, surcharge: 384.30 * inf, tier: 4, label: 'Tier 4' },
+                { limit: Infinity, surcharge: 419.30 * inf, tier: 5, label: 'Tier 5' }
+            ];
+            
+            let surcharge = 0;
+            let tierInfo = { tier: 0, label: 'None' };
+            for (const t of tiers) {
+                if (magi <= t.limit) {
+                    surcharge = t.surcharge;
+                    tierInfo = { tier: t.tier, label: t.label };
+                    break;
+                }
+            }
+            
+            const numPeople = isMarried ? 2 : 1;
+            const baseCost = numPeople * 12 * basePremium;
+            const irmaaCost = numPeople * 12 * surcharge;
+            const total = baseCost + irmaaCost;
+            
+            return {
+                total,
+                baseCost,
+                irmaaCost,
+                tier: tierInfo.tier,
+                tierLabel: tierInfo.label,
+                monthlyBase: basePremium,
+                monthlySurcharge: surcharge
+            };
+        };
+        
+        // ============ MAIN COMPONENT ============
+        const RetirementOptimizer = () => {
+            const [activeTab, setActiveTab] = useState('projection');
+            const [showInputs, setShowInputs] = useState(true);
+            const [showDetails, setShowDetails] = useState(false);
+            const [showSweetSpot, setShowSweetSpot] = useState(false);
+            const [showGuardrails, setShowGuardrails] = useState(false);
+            const [scenario, setScenario] = useState('base');
+            
+            const [inputs, setInputs] = useState({
+                // Filing status
+                filingStatus: 'married', // 'married' or 'single'
+                
+                // Account balances
+                brokerageStart: 1000000,
+                traditional401kStart: 1500000,
+                roth401kStart: 500000,
+                hsaStart: 75000,
+                brokerageBasisPercent: 50,
+                
+                // Ages & Timeline
+                yourAgeStart: 55,
+                spouseAgeStart: 48,
+                todayYear: 2026,      // Current year
+                startYear: 2027,      // Year withdrawals begin (retirement year)
+                yourDeathAge: 85,
+                spouseDeathAge: 90,
+                
+                // Social Security
+                yourSSMonthly: 4095,
+                yourSSStartAge: 67,
+                spouseSSMonthly: 3095,
+                spouseSSStartAge: 67,
+                
+                // Financial assumptions
+                investmentReturn: 7,
+                inflationRate: 3,
+                taxBracketInflation: 2.5,
+                
+                // Bad sequence modeling
+                investmentReturnBad: -10,
+                badSequenceStart: 0,  // Year offset when bad sequence starts (0 = first year)
+                badSequenceYears: 0,  // Duration of bad sequence
+                
+                // Strategy
+                targetTaxBracket: 12,
+                realSpendingNeed: 144000,
+                survivorSpendingNeed: 100000, // Spending after one spouse passes (in today's dollars)
+                rmdStartAge: 75,
+                useRule55: true,
+                aggressiveConversion: false,
+                stateIncomeTax: 0,
+                supplementalHealthcare: 3000, // Annual additional healthcare costs (dental, vision, copays, etc.)
+                
+                // Children (for healthcare coverage - stay on insurance until age 26)
+                numChildren: 0,
+                childAge1: 0,
+                childAge2: 0,
+                childAge3: 0,
+                childAge4: 0,
+            });
+            
+            const handleInputChange = useCallback((field, value) => {
+                // Handle non-numeric fields
+                if (field === 'filingStatus') {
+                    setInputs(prev => ({ ...prev, [field]: value }));
+                    return;
+                }
+                
+                const numValue = parseFloat(value) || 0;
+                
+                // Handle SS age changes - update corresponding benefit
+                if (field === 'yourSSStartAge') {
+                    const age = getClosestSSAge(numValue, SS_BENEFITS_YOU);
+                    const benefit = SS_BENEFITS_YOU[age] || inputs.yourSSMonthly;
+                    setInputs(prev => ({ 
+                        ...prev, 
+                        yourSSStartAge: numValue,
+                        yourSSMonthly: benefit
+                    }));
+                    return;
+                }
+                
+                if (field === 'spouseSSStartAge') {
+                    const age = getClosestSSAge(numValue, SS_BENEFITS_SPOUSE);
+                    const benefit = SS_BENEFITS_SPOUSE[age] || inputs.spouseSSMonthly;
+                    setInputs(prev => ({ 
+                        ...prev, 
+                        spouseSSStartAge: numValue,
+                        spouseSSMonthly: benefit
+                    }));
+                    return;
+                }
+                
+                // Handle SS benefit changes - update corresponding age
+                if (field === 'yourSSMonthly') {
+                    const age = getAgeForBenefit(numValue, SS_BENEFITS_YOU);
+                    setInputs(prev => ({ 
+                        ...prev, 
+                        yourSSMonthly: numValue,
+                        yourSSStartAge: age
+                    }));
+                    return;
+                }
+                
+                if (field === 'spouseSSMonthly') {
+                    const age = getAgeForBenefit(numValue, SS_BENEFITS_SPOUSE);
+                    setInputs(prev => ({ 
+                        ...prev, 
+                        spouseSSMonthly: numValue,
+                        spouseSSStartAge: age
+                    }));
+                    return;
+                }
+                
+                // Default handling for other fields
+                setInputs(prev => ({ ...prev, [field]: numValue }));
+            }, [inputs.yourSSMonthly, inputs.spouseSSMonthly]);
+            
+            const handleCheckboxChange = useCallback((field, checked) => {
+                setInputs(prev => ({ ...prev, [field]: checked }));
+            }, []);
+            
+            // ============ PROJECTION CALCULATION ============
+            const projectionData = useMemo(() => {
+                const data = [];
+                let brk = inputs.brokerageStart;
+                let t401k = inputs.traditional401kStart;
+                let roth = inputs.roth401kStart;
+                let hsa = inputs.hsaStart;
+                let basis = inputs.brokerageStart * (inputs.brokerageBasisPercent / 100);
+                
+                // MAGI history for IRMAA 2-year lookback
+                // Pre-populate with estimates for years before projection starts
+                const magiHistory = [];
+                
+                const isSingleFiler = inputs.filingStatus === 'single';
+                
+                // Calculate years between today and retirement start (accumulation phase)
+                const accumulationYears = Math.max(0, inputs.startYear - inputs.todayYear);
+                
+                // Calculate ages at today vs retirement
+                const yourAgeToday = inputs.yourAgeStart - accumulationYears;
+                const spouseAgeToday = inputs.spouseAgeStart - accumulationYears;
+                
+                // Apply accumulation phase growth (no withdrawals, just market returns)
+                // AND add rows to the data output
+                for (let accYr = 0; accYr < accumulationYears; accYr++) {
+                    const calYear = inputs.todayYear + accYr;
+                    const yourAge = yourAgeToday + accYr;
+                    const spouseAge = isSingleFiler ? null : spouseAgeToday + accYr;
+                    
+                    // Check if in bad sequence during accumulation
+                    const yrFromToday = accYr;
+                    const inBadSequence = yrFromToday >= inputs.badSequenceStart && 
+                                          yrFromToday < (inputs.badSequenceStart + inputs.badSequenceYears);
+                    const useReturn = inBadSequence
+                        ? inputs.investmentReturnBad / 100 
+                        : inputs.investmentReturn / 100;
+                    
+                    // Record balances BEFORE growth for this year
+                    const brkStart = brk;
+                    const t401kStart = t401k;
+                    const rothStart = roth;
+                    const hsaStart = hsa;
+                    
+                    // Grow all accounts with no withdrawals
+                    brk = brk * (1 + useReturn);
+                    t401k = t401k * (1 + useReturn);
+                    roth = roth * (1 + useReturn);
+                    hsa = hsa * (1 + useReturn);
+                    
+                    // Add accumulation year to data
+                    data.push({
+                        year: calYear,
+                        yourAge: yourAge,
+                        spouseAge: spouseAge,
+                        isMarried: !isSingleFiler,
+                        isAccumulation: true,  // Flag to indicate pre-retirement year
+                        
+                        // No withdrawals during accumulation
+                        w401k: 0,
+                        wBrk: 0,
+                        wRoth: 0,
+                        wHSA: 0,
+                        
+                        // No SS during accumulation
+                        ss: 0,
+                        ssTaxable: 0,
+                        
+                        // No taxes during accumulation (not modeling work income)
+                        ltcg: 0,
+                        rmd: 0,
+                        conv: 0,
+                        ordinaryTax: 0,
+                        ltcgTax: 0,
+                        niit: 0,
+                        penalty: 0,
+                        stateTax: 0,
+                        totalTax: 0,
+                        effectiveRate: 0,
+                        
+                        // No healthcare costs modeled during accumulation (assume employer covers)
+                        healthCost: 0,
+                        healthcareType: 'Working',
+                        childrenOnPlan: 0,
+                        acaCost: 0,
+                        medicareCost: 0,
+                        irmaaCost: 0,
+                        irmaaTier: '',
+                        irmaaMagi: 0,
+                        supplementalCost: 0,
+                        
+                        // Balances at END of year (after growth)
+                        brkEnd: Math.round(brk),
+                        t401kEnd: Math.round(t401k),
+                        rothEnd: Math.round(roth),
+                        hsaEnd: Math.round(hsa),
+                        totalBalance: Math.round(brk + t401k + roth + hsa),
+                        
+                        // No spending need during accumulation
+                        grossIncome: 0,
+                        netIncome: 0,
+                        need: 0,
+                        isSurvivor: false,
+                        excess: 0,
+                        shortfall: 0,
+                    });
+                }
+                
+                const yourDeathYear = inputs.startYear + (inputs.yourDeathAge - inputs.yourAgeStart);
+                const spouseDeathYear = isSingleFiler ? 0 : inputs.startYear + (inputs.spouseDeathAge - inputs.spouseAgeStart);
+                const endYear = isSingleFiler ? yourDeathYear : Math.max(yourDeathYear, spouseDeathYear);
+                const totalYears = endYear - inputs.startYear + 1;
+                
+                for (let yr = 0; yr < totalYears; yr++) {
+                    const calYear = inputs.startYear + yr;
+                    const yourAge = inputs.yourAgeStart + yr;
+                    const spouseAge = isSingleFiler ? null : inputs.spouseAgeStart + yr;
+                    const youAlive = calYear <= yourDeathYear;
+                    const spouseAlive = isSingleFiler ? false : calYear <= spouseDeathYear;
+                    
+                    if (!youAlive && !spouseAlive) break;
+                    
+                    const isMarried = !isSingleFiler && youAlive && spouseAlive;
+                    const primaryAge = youAlive ? yourAge : spouseAge;
+                    const secondaryAge = isMarried ? spouseAge : null;
+                    
+                    // Determine return rate (sequence of returns risk)
+                    // Bad sequence year offset is relative to todayYear, not startYear
+                    const yrFromToday = accumulationYears + yr;
+                    const inBadSequence = yrFromToday >= inputs.badSequenceStart && 
+                                          yrFromToday < (inputs.badSequenceStart + inputs.badSequenceYears);
+                    const useReturn = inBadSequence
+                        ? inputs.investmentReturnBad / 100 
+                        : inputs.investmentReturn / 100;
+                    
+                    const generalInf = Math.pow(1 + inputs.inflationRate / 100, yr);
+                    
+                    // Use survivor spending if one spouse has passed (married filing only)
+                    const bothAlive = youAlive && spouseAlive;
+                    const isSurvivor = !isSingleFiler && !bothAlive && (youAlive || spouseAlive);
+                    const baseSpending = isSurvivor ? inputs.survivorSpendingNeed : inputs.realSpendingNeed;
+                    const need = baseSpending * generalInf;
+                    
+                    // ===== SOCIAL SECURITY CALCULATION =====
+                    let yourSS = 0, spouseSS = 0, survivorSS = 0;
+                    
+                    // Your SS (only if alive and past start age)
+                    if (youAlive && yourAge >= inputs.yourSSStartAge) {
+                        // COLA applies from start year, not from today
+                        const yearsCollecting = yourAge - inputs.yourSSStartAge;
+                        const startYearFromNow = inputs.yourSSStartAge - inputs.yourAgeStart;
+                        const colaFactor = Math.pow(1 + inputs.inflationRate / 100, startYearFromNow + yearsCollecting);
+                        yourSS = inputs.yourSSMonthly * 12 * colaFactor;
+                    }
+                    
+                    // Spouse SS (only if married filing and spouse alive and past start age)
+                    if (!isSingleFiler && spouseAlive && spouseAge >= inputs.spouseSSStartAge) {
+                        const yearsCollecting = spouseAge - inputs.spouseSSStartAge;
+                        const startYearFromNow = inputs.spouseSSStartAge - inputs.spouseAgeStart;
+                        const colaFactor = Math.pow(1 + inputs.inflationRate / 100, startYearFromNow + yearsCollecting);
+                        spouseSS = inputs.spouseSSMonthly * 12 * colaFactor;
+                    }
+                    
+                    // Survivor benefit (if one spouse died) - only for married filing
+                    if (!isSingleFiler) {
+                        if (!youAlive && spouseAlive && spouseAge >= 60) {
+                            // Survivor gets the higher of their own benefit or deceased's benefit
+                            const yourBenefitAtDeath = inputs.yourSSMonthly * 12 * 
+                                Math.pow(1 + inputs.inflationRate / 100, yourDeathYear - inputs.startYear);
+                            survivorSS = Math.max(0, yourBenefitAtDeath - spouseSS);
+                        }
+                        
+                        if (!spouseAlive && youAlive && yourAge >= 60) {
+                            const spouseBenefitAtDeath = inputs.spouseSSMonthly * 12 * 
+                                Math.pow(1 + inputs.inflationRate / 100, spouseDeathYear - inputs.startYear);
+                            survivorSS = Math.max(0, spouseBenefitAtDeath - yourSS);
+                        }
+                    }
+                    
+                    const totalSS = yourSS + spouseSS + survivorSS;
+                    
+                    // ===== RMD CALCULATION =====
+                    const rmdAge = youAlive ? yourAge : spouseAge;
+                    const rmd = calculateRMD(t401k, rmdAge, inputs.rmdStartAge);
+                    
+                    // ===== WITHDRAWAL STRATEGY =====
+                    const stdDed = getStandardDeduction(calYear, isMarried, primaryAge, secondaryAge, inputs.taxBracketInflation);
+                    const brackets = getTaxBrackets(calYear, isMarried, inputs.taxBracketInflation);
+                    const ltcgThresholds = getLTCGThresholds(calYear, isMarried, inputs.taxBracketInflation);
+                    
+                    // Find target bracket limit
+                    const targetRate = inputs.targetTaxBracket / 100;
+                    let targetBracketLimit = brackets[0].limit;
+                    for (const b of brackets) {
+                        if (b.rate === targetRate) {
+                            targetBracketLimit = b.limit;
+                            break;
+                        }
+                    }
+                    
+                    // Calculate how much ordinary income we can have in target bracket
+                    const maxTaxableOrdinary = targetBracketLimit;
+                    const maxGrossOrdinary = maxTaxableOrdinary + stdDed;
+                    
+                    // Estimate taxable SS (iterative since it depends on other income)
+                    let w401 = 0, wBrk = 0, wRoth = 0, wHSA = 0, conv = 0, ltcg = 0;
+                    
+                    // Start with RMD as minimum 401k withdrawal
+                    w401 = rmd;
+                    
+                    // Estimate other ordinary income to calculate SS taxation
+                    let estOtherIncome = w401;
+                    let ssTaxable = getSSATaxableAmount(totalSS, estOtherIncome, isMarried);
+                    
+                    // Room in ordinary income bracket
+                    let ordinaryRoom = Math.max(0, maxGrossOrdinary - ssTaxable - w401);
+                    
+                    // If aggressive conversion is ON and we're in conversion-eligible years,
+                    // reserve some bracket room for conversions instead of withdrawals
+                    let reserveForConversion = 0;
+                    if (inputs.aggressiveConversion && youAlive && yourAge < inputs.rmdStartAge && t401k > 100000) {
+                        // Reserve up to 50% of room or 15% of 401k for conversion
+                        reserveForConversion = Math.min(ordinaryRoom * 0.5, t401k * 0.15);
+                    }
+                    
+                    // Fill ordinary income bracket with 401k withdrawals (if beneficial)
+                    // But leave room for conversions if aggressive mode
+                    const roomForWithdrawals = ordinaryRoom - reserveForConversion;
+                    if (roomForWithdrawals > 0 && t401k > w401) {
+                        const additional401k = Math.min(roomForWithdrawals, t401k - w401);
+                        w401 += additional401k;
+                        ordinaryRoom -= additional401k;
+                    }
+                    
+                    // Recalculate SS taxable with actual 401k withdrawal
+                    ssTaxable = getSSATaxableAmount(totalSS, w401, isMarried);
+                    
+                    // Calculate taxable ordinary income
+                    const taxableOrdinary = Math.max(0, w401 + ssTaxable - stdDed);
+                    
+                    // LTCG harvesting - fill 0% bracket
+                    const ltcg0Room = Math.max(0, ltcgThresholds.zero - taxableOrdinary);
+                    if (ltcg0Room > 0 && brk > 0) {
+                        const gainRatio = Math.max(0.01, 1 - (basis / Math.max(1, brk)));
+                        const maxBrkForZeroLTCG = gainRatio > 0 ? ltcg0Room / gainRatio : 0;
+                        wBrk = Math.min(maxBrkForZeroLTCG, brk);
+                        ltcg = wBrk * gainRatio;
+                    }
+                    
+                    // Calculate taxes so far
+                    let ordinaryTax = calculateOrdinaryTax(taxableOrdinary, calYear, isMarried, inputs.taxBracketInflation);
+                    let ltcgTax = calculateLTCGTax(ltcg, taxableOrdinary, calYear, isMarried, inputs.taxBracketInflation);
+                    
+                    // Early withdrawal penalty
+                    const penalty = calculateEarlyWithdrawalPenalty(w401, primaryAge, inputs.useRule55);
+                    
+                    // State tax (simplified flat rate)
+                    const stateTax = (w401 + ssTaxable) * (inputs.stateIncomeTax / 100);
+                    
+                    // Count eligible children (under age 26) for healthcare coverage
+                    const childAges = [inputs.childAge1, inputs.childAge2, inputs.childAge3, inputs.childAge4];
+                    let eligibleChildren = 0;
+                    for (let i = 0; i < inputs.numChildren; i++) {
+                        const childCurrentAge = childAges[i] + yr;
+                        if (childCurrentAge < 26) {
+                            eligibleChildren++;
+                        }
+                    }
+                    
+                    // Healthcare costs - detailed breakdown
+                    const magi = w401 + ssTaxable + ltcg + conv; // Include Roth conversions in MAGI!
+                    
+                    // Store MAGI for IRMAA lookback (Medicare uses income from 2 years prior)
+                    magiHistory.push(magi);
+                    
+                    // Get MAGI for IRMAA calculation (2-year lookback)
+                    // For first 2 years, use current MAGI as estimate
+                    const irmaaLookbackIndex = yr - 2;
+                    const magiForIRMAA = irmaaLookbackIndex >= 0 ? magiHistory[irmaaLookbackIndex] : magi;
+                    
+                    let healthCost = 0;
+                    let acaCost = 0;
+                    let medicareCost = 0;
+                    let irmaaCost = 0;
+                    let irmaaTier = '';
+                    let healthcareType = '';
+                    let childrenOnPlan = 0;
+                    
+                    // Supplemental costs (dental, vision, copays, etc.) - inflation adjusted
+                    // Scale supplemental costs with household size
+                    const householdForSupplemental = (isSingleFiler ? 1 : 2) + eligibleChildren;
+                    const supplementalCost = inputs.supplementalHealthcare * generalInf * (1 + eligibleChildren * 0.3);
+                    
+                    if (isSingleFiler) {
+                        // Single filer
+                        if (yourAge >= 65) {
+                            const irmaaResult = calculateIRMAA(magiForIRMAA, calYear, false, inputs.inflationRate);
+                            medicareCost = irmaaResult.baseCost;
+                            irmaaCost = irmaaResult.irmaaCost;
+                            irmaaTier = irmaaResult.tierLabel;
+                            healthcareType = 'Medicare';
+                            healthCost = irmaaResult.total;
+                            
+                            // Children still need coverage if parent is on Medicare
+                            // They would need their own ACA plan
+                            if (eligibleChildren > 0) {
+                                const childAcaResult = calculateACAHealthcare(magi, calYear, inputs.inflationRate, 0, eligibleChildren);
+                                acaCost = childAcaResult.total;
+                                healthCost += acaCost;
+                                healthcareType = 'Medicare+ACA(kids)';
+                                childrenOnPlan = eligibleChildren;
+                            }
+                        } else {
+                            // Parent under 65: all on ACA together
+                            const acaResult = calculateACAHealthcare(magi, calYear, inputs.inflationRate, 1, eligibleChildren);
+                            acaCost = acaResult.total;
+                            healthcareType = eligibleChildren > 0 ? `ACA(1+${eligibleChildren})` : 'ACA';
+                            healthCost = acaResult.total;
+                            childrenOnPlan = eligibleChildren;
+                        }
+                    } else {
+                        // Married filing
+                        const anyUnder65 = (youAlive && yourAge < 65) || (spouseAlive && spouseAge < 65);
+                        const allOver65 = (!youAlive || yourAge >= 65) && (!spouseAlive || spouseAge >= 65);
+                        
+                        if (allOver65) {
+                            const irmaaResult = calculateIRMAA(magiForIRMAA, calYear, isMarried, inputs.inflationRate);
+                            medicareCost = irmaaResult.baseCost;
+                            irmaaCost = irmaaResult.irmaaCost;
+                            irmaaTier = irmaaResult.tierLabel;
+                            healthcareType = 'Medicare';
+                            healthCost = irmaaResult.total;
+                            
+                            // Children need their own ACA coverage
+                            if (eligibleChildren > 0) {
+                                const childAcaResult = calculateACAHealthcare(magi, calYear, inputs.inflationRate, 0, eligibleChildren);
+                                acaCost = childAcaResult.total;
+                                healthCost += acaCost;
+                                healthcareType = 'Medicare+ACA(kids)';
+                                childrenOnPlan = eligibleChildren;
+                            }
+                        } else if (anyUnder65) {
+                            // At least one parent under 65: children go on ACA with that parent
+                            const numAdultsOnACA = (youAlive && yourAge < 65 ? 1 : 0) + (spouseAlive && spouseAge < 65 ? 1 : 0);
+                            const acaResult = calculateACAHealthcare(magi, calYear, inputs.inflationRate, numAdultsOnACA, eligibleChildren);
+                            acaCost = acaResult.total;
+                            childrenOnPlan = eligibleChildren;
+                            
+                            if (isMarried && ((yourAge >= 65) || (spouseAge >= 65))) {
+                                const irmaaResult = calculateIRMAA(magiForIRMAA, calYear, false, inputs.inflationRate);
+                                medicareCost = irmaaResult.baseCost;
+                                irmaaCost = irmaaResult.irmaaCost;
+                                irmaaTier = irmaaResult.tierLabel;
+                            }
+                            
+                            if (medicareCost > 0) {
+                                healthcareType = eligibleChildren > 0 ? `ACA(${numAdultsOnACA}+${eligibleChildren})+Medicare` : 'ACA+Medicare';
+                            } else {
+                                healthcareType = eligibleChildren > 0 ? `ACA(${numAdultsOnACA}+${eligibleChildren})` : 'ACA';
+                            }
+                            healthCost = acaCost + medicareCost + irmaaCost;
+                        }
+                    }
+                    
+                    // Add supplemental costs
+                    const totalHealthCost = healthCost + supplementalCost;
+                    
+                    // Total tax burden
+                    let totalTax = ordinaryTax + ltcgTax + penalty + stateTax;
+                    
+                    // NIIT (on investment income if MAGI exceeds threshold)
+                    const niit = calculateNIIT(magi, ltcg, isMarried);
+                    totalTax += niit;
+                    
+                    // Calculate net income and shortfall
+                    let netIncome = w401 + wBrk + totalSS - totalTax - totalHealthCost;
+                    let shortfall = need - netIncome;
+                    
+                    // Fill shortfall from Roth (tax-free)
+                    if (shortfall > 0 && roth > 0) {
+                        wRoth = Math.min(shortfall, roth);
+                        shortfall -= wRoth;
+                        netIncome += wRoth;
+                    }
+                    
+                    // Fill remaining shortfall from HSA
+                    // HSA rules for tax-free withdrawals:
+                    // - ANY age: out-of-pocket medical (copays, dental, vision, prescriptions)
+                    // - Age 65+: can also pay Medicare premiums tax-free
+                    // - CANNOT use tax-free for: ACA premiums, Medigap premiums (before or after 65)
+                    // After 65, non-medical withdrawals are taxed as income (no penalty)
+                    
+                    // Calculate what portion of healthcare is HSA-eligible
+                    let hsaEligibleMedical = supplementalCost; // Copays, dental, vision always eligible
+                    if (primaryAge >= 65) {
+                        // After 65: Medicare base premiums are HSA-eligible, but not IRMAA or Medigap
+                        hsaEligibleMedical += medicareCost; // Base Medicare premiums OK
+                        // Note: IRMAA surcharges and Medigap are NOT HSA-eligible
+                    }
+                    // ACA premiums are NEVER HSA-eligible
+                    
+                    if (shortfall > 0 && hsa > 0) {
+                        if (primaryAge >= 65) {
+                            // After 65: can use HSA for anything (medical = tax-free, other = taxed like IRA)
+                            wHSA = Math.min(shortfall, hsa);
+                        } else {
+                            // Before 65: only use HSA for qualified medical expenses
+                            wHSA = Math.min(shortfall, hsaEligibleMedical, hsa);
+                        }
+                        shortfall -= wHSA;
+                        netIncome += wHSA;
+                    }
+                    
+                    // If still short, take more from brokerage (iterate to account for taxes on gains)
+                    let iterations = 0;
+                    const availableBrk = brk; // Total brokerage available this year
+                    while (shortfall > 0 && wBrk < availableBrk && iterations < 10) {
+                        iterations++;
+                        // Need to pull extra to cover taxes on the withdrawal
+                        const currentBasis = basis * ((availableBrk - wBrk) / Math.max(1, availableBrk));
+                        const remainingBrk = availableBrk - wBrk;
+                        const gainRatio = Math.max(0.01, 1 - (currentBasis / Math.max(1, remainingBrk)));
+                        
+                        // Estimate: need to pull shortfall + taxes on the gains
+                        // Approximate marginal tax on additional LTCG (use 15% as estimate)
+                        const grossNeeded = shortfall / (1 - gainRatio * 0.15);
+                        const additionalBrk = Math.min(grossNeeded, remainingBrk);
+                        
+                        if (additionalBrk < 100) break; // Don't bother with tiny amounts
+                        
+                        const additionalGain = additionalBrk * gainRatio;
+                        wBrk += additionalBrk;
+                        ltcg += additionalGain;
+                        
+                        // Recalculate all taxes
+                        ltcgTax = calculateLTCGTax(ltcg, taxableOrdinary, calYear, isMarried, inputs.taxBracketInflation);
+                        const newMagi = w401 + ssTaxable + ltcg;
+                        const newNiit = calculateNIIT(newMagi, ltcg, isMarried);
+                        totalTax = ordinaryTax + ltcgTax + penalty + stateTax + newNiit;
+                        netIncome = w401 + wBrk + wRoth + wHSA + totalSS - totalTax - totalHealthCost;
+                        shortfall = Math.max(0, need - netIncome);
+                    }
+                    
+                    // If STILL short after brokerage, pull more from 401k (even if above target bracket)
+                    if (shortfall > 0 && t401k > w401) {
+                        const additional401k = Math.min(shortfall * 1.4, t401k - w401); // 1.4x to cover taxes
+                        w401 += additional401k;
+                        
+                        // Recalculate taxes
+                        const newSsTaxable = getSSATaxableAmount(totalSS, w401, isMarried);
+                        const newTaxableOrdinary = Math.max(0, w401 + newSsTaxable - stdDed);
+                        ordinaryTax = calculateOrdinaryTax(newTaxableOrdinary, calYear, isMarried, inputs.taxBracketInflation);
+                        ltcgTax = calculateLTCGTax(ltcg, newTaxableOrdinary, calYear, isMarried, inputs.taxBracketInflation);
+                        const newMagi = w401 + newSsTaxable + ltcg;
+                        const newNiit = calculateNIIT(newMagi, ltcg, isMarried);
+                        const newPenalty = calculateEarlyWithdrawalPenalty(w401, primaryAge, inputs.useRule55);
+                        const newStateTax = (w401 + newSsTaxable) * (inputs.stateIncomeTax / 100);
+                        totalTax = ordinaryTax + ltcgTax + newPenalty + newStateTax + newNiit;
+                        netIncome = w401 + wBrk + wRoth + wHSA + totalSS - totalTax - totalHealthCost;
+                        shortfall = Math.max(0, need - netIncome);
+                    }
+                    
+                    // Roth conversion opportunity
+                    // Strategy: In years before SS starts, we have lower income - great time to convert
+                    conv = 0;
+                    let conversionTax = 0;
+                    if (youAlive && yourAge < inputs.rmdStartAge && t401k > 100000) {
+                        // Calculate actual taxable income after all withdrawals
+                        const actualSsTaxable = getSSATaxableAmount(totalSS, w401, isMarried);
+                        const actualTaxableOrdinary = Math.max(0, w401 + actualSsTaxable - stdDed);
+                        
+                        if (inputs.aggressiveConversion) {
+                            // Aggressive: Convert up to the TOP of the target bracket
+                            // Even if it means some conversion is taxed at the target rate
+                            const roomToTopOfBracket = Math.max(0, targetBracketLimit - actualTaxableOrdinary);
+                            conv = Math.min(roomToTopOfBracket, t401k - w401, t401k * 0.15);
+                        } else {
+                            // Conservative: Only convert 50% of available room, max 5% of 401k
+                            const roomToTopOfBracket = Math.max(0, targetBracketLimit - actualTaxableOrdinary);
+                            conv = Math.min(roomToTopOfBracket * 0.5, t401k * 0.05);
+                        }
+                        
+                        // Don't bother with tiny conversions
+                        if (conv < 5000) conv = 0;
+                        
+                        // No conversions if we had to pull extra 401k for spending (already high income year)
+                        if (actualTaxableOrdinary > targetBracketLimit) conv = 0;
+                        
+                        // Calculate tax on the conversion (it's added to ordinary income)
+                        if (conv > 0) {
+                            const taxableWithConversion = actualTaxableOrdinary + conv;
+                            const taxWithConversion = calculateOrdinaryTax(taxableWithConversion, calYear, isMarried, inputs.taxBracketInflation);
+                            const taxWithoutConversion = calculateOrdinaryTax(actualTaxableOrdinary, calYear, isMarried, inputs.taxBracketInflation);
+                            conversionTax = taxWithConversion - taxWithoutConversion;
+                            totalTax += conversionTax;
+                        }
+                    }
+                    
+                    // Calculate excess to reinvest
+                    const excess = Math.max(0, netIncome - need);
+                    
+                    // Update basis for brokerage withdrawal
+                    const basisWithdrawn = wBrk > 0 ? wBrk * (basis / Math.max(1, brk)) : 0;
+                    basis = Math.max(0, basis - basisWithdrawn);
+                    
+                    // Update account balances
+                    brk = Math.max(0, (brk - wBrk) * (1 + useReturn) + excess);
+                    t401k = Math.max(0, (t401k - w401 - conv) * (1 + useReturn));
+                    roth = Math.max(0, (roth + conv - wRoth) * (1 + useReturn));
+                    hsa = Math.max(0, (hsa - wHSA) * (1 + useReturn));
+                    
+                    // Add excess to basis
+                    if (excess > 0) basis += excess;
+                    
+                    // Effective tax rate
+                    const grossIncome = w401 + wBrk + totalSS;
+                    const effectiveRate = grossIncome > 0 ? totalTax / grossIncome : 0;
+                    
+                    data.push({
+                        year: calYear,
+                        yourAge: youAlive ? yourAge : '†',
+                        spouseAge: isSingleFiler ? null : (spouseAlive ? spouseAge : '†'),
+                        isMarried,
+                        isAccumulation: false,  // This is a retirement year
+                        
+                        // Withdrawals
+                        w401k: Math.round(w401),
+                        wBrk: Math.round(wBrk),
+                        wRoth: Math.round(wRoth),
+                        wHSA: Math.round(wHSA),
+                        totalWithdrawal: Math.round(w401 + wBrk + wRoth + wHSA),
+                        
+                        // Income
+                        ss: Math.round(totalSS),
+                        ssTaxable: Math.round(ssTaxable),
+                        ltcg: Math.round(ltcg),
+                        rmd: Math.round(rmd),
+                        conv: Math.round(conv),
+                        
+                        // Taxes
+                        ordinaryTax: Math.round(ordinaryTax),
+                        ltcgTax: Math.round(ltcgTax),
+                        niit: Math.round(niit),
+                        penalty: Math.round(penalty),
+                        stateTax: Math.round(stateTax),
+                        totalTax: Math.round(totalTax),
+                        
+                        // Healthcare breakdown
+                        healthCost: Math.round(totalHealthCost),
+                        acaCost: Math.round(acaCost),
+                        medicareCost: Math.round(medicareCost),
+                        irmaaCost: Math.round(irmaaCost),
+                        irmaaTier,
+                        irmaaMagi: Math.round(magiForIRMAA), // MAGI used for IRMAA (2-year lookback)
+                        supplementalCost: Math.round(supplementalCost),
+                        healthcareType,
+                        childrenOnPlan,
+                        
+                        effectiveRate,
+                        
+                        // Balances
+                        brkEnd: Math.round(brk),
+                        t401kEnd: Math.round(t401k),
+                        rothEnd: Math.round(roth),
+                        hsaEnd: Math.round(hsa),
+                        totalBalance: Math.round(brk + t401k + roth + hsa),
+                        
+                        // Net
+                        grossIncome: Math.round(grossIncome),
+                        netIncome: Math.round(netIncome),
+                        need: Math.round(need),
+                        isSurvivor,
+                        excess: Math.round(excess),
+                        shortfall: Math.round(Math.max(0, need - netIncome)),
+                    });
+                }
+                
+                return data;
+            }, [inputs]);
+            
+            // ============ SUMMARY STATS ============
+            const summary = useMemo(() => {
+                const totals = projectionData.reduce((acc, row) => ({
+                    tax: acc.tax + row.totalTax,
+                    niit: acc.niit + row.niit,
+                    health: acc.health + row.healthCost,
+                    conv: acc.conv + row.conv,
+                    ss: acc.ss + row.ss,
+                    shortfall: acc.shortfall + row.shortfall,
+                }), { tax: 0, niit: 0, health: 0, conv: 0, ss: 0, shortfall: 0 });
+                
+                const lastYear = projectionData[projectionData.length - 1];
+                const avgEffectiveRate = projectionData.reduce((sum, r) => sum + r.effectiveRate, 0) / projectionData.length;
+                
+                return {
+                    ...totals,
+                    finalBalance: lastYear?.totalBalance || 0,
+                    avgEffectiveRate,
+                    years: projectionData.length,
+                };
+            }, [projectionData]);
+            
+            // ============ ROTH CONVERSION SWEET SPOT ANALYSIS ============
+            const conversionAnalysis = useMemo(() => {
+                if (projectionData.length === 0) return null;
+                
+                const firstYear = projectionData[0];
+                if (!firstYear || firstYear.t401kEnd <= 0) return null;
+                
+                const calYear = firstYear.year;
+                const isMarried = firstYear.isMarried;
+                const yourAge = typeof firstYear.yourAge === 'number' ? firstYear.yourAge : 0;
+                
+                // Skip if already taking RMDs or no 401k
+                if (yourAge >= inputs.rmdStartAge) return { message: "RMDs have started - conversion strategy less relevant" };
+                
+                // Get tax parameters for this year
+                const stdDed = getStandardDeduction(calYear, isMarried, yourAge, null, inputs.taxBracketInflation);
+                const brackets = getTaxBrackets(calYear, isMarried, inputs.taxBracketInflation);
+                
+                // Current income (before any additional conversion)
+                const baseOrdinaryIncome = firstYear.w401k + firstYear.ssTaxable;
+                const baseTaxableIncome = Math.max(0, baseOrdinaryIncome - stdDed);
+                const currentConversion = firstYear.conv;
+                
+                // IRMAA thresholds (married 2024, inflation-adjusted)
+                const irmaaBaseThreshold = isMarried ? 206000 : 103000;
+                const yearsFromBase = calYear - 2024;
+                const irmaaThreshold = irmaaBaseThreshold * Math.pow(1 + inputs.inflationRate / 100, yearsFromBase);
+                
+                // Test different conversion amounts
+                const scenarios = [];
+                const t401kAvailable = inputs.traditional401kStart;
+                const maxTestConversion = Math.min(t401kAvailable * 0.25, 200000);
+                
+                for (let testConv = 0; testConv <= maxTestConversion; testConv += 5000) {
+                    const taxableWithConv = baseTaxableIncome + testConv;
+                    const tax = calculateOrdinaryTax(taxableWithConv, calYear, isMarried, inputs.taxBracketInflation);
+                    const marginalRate = taxableWithConv > 0 ? (tax / taxableWithConv) : 0;
+                    
+                    // Estimate MAGI for IRMAA (will hit 2 years later)
+                    const estimatedMagi = baseOrdinaryIncome + testConv + firstYear.ltcg;
+                    const triggersIRMAA = estimatedMagi > irmaaThreshold;
+                    
+                    // Find which bracket we're in
+                    let bracketRate = 0;
+                    for (const bracket of brackets) {
+                        if (taxableWithConv <= bracket.limit) {
+                            bracketRate = bracket.rate * 100;
+                            break;
+                        }
+                        bracketRate = bracket.rate * 100;
+                    }
+                    
+                    scenarios.push({
+                        conversion: testConv,
+                        tax,
+                        effectiveRate: marginalRate,
+                        bracketRate,
+                        triggersIRMAA,
+                        magi: estimatedMagi
+                    });
+                }
+                
+                // Find sweet spots - brackets are {limit, rate} objects
+                const bracket12 = brackets.find(b => b.rate === 0.12);
+                const bracket22 = brackets.find(b => b.rate === 0.22);
+                const bracket24 = brackets.find(b => b.rate === 0.24);
+                
+                const bracket12Limit = bracket12 ? bracket12.limit : 0;
+                const bracket22Limit = bracket22 ? bracket22.limit : 0;
+                const bracket24Limit = bracket24 ? bracket24.limit : 0;
+                
+                // Calculate room to each bracket
+                const roomTo12 = Math.max(0, bracket12Limit - baseTaxableIncome);
+                const roomTo22 = Math.max(0, bracket22Limit - baseTaxableIncome);
+                const roomTo24 = Math.max(0, bracket24Limit - baseTaxableIncome);
+                const roomToIRMAA = Math.max(0, irmaaThreshold - (baseOrdinaryIncome + firstYear.ltcg));
+                
+                // Find optimal: fill 12% bracket but avoid IRMAA if possible
+                let optimal = Math.min(roomTo12, t401kAvailable * 0.15);
+                let optimalReason = "Fill 12% bracket";
+                
+                if (roomTo12 <= 0 && roomTo22 > 0) {
+                    optimal = Math.min(roomTo22 * 0.5, t401kAvailable * 0.10);
+                    optimalReason = "Partial fill of 22% bracket";
+                }
+                
+                // Cap at IRMAA threshold if relevant (age 63+ since 2-year lookback)
+                if (yourAge >= 63 && optimal > roomToIRMAA && roomToIRMAA > 0) {
+                    optimal = roomToIRMAA;
+                    optimalReason = "Maximize without triggering IRMAA";
+                }
+                
+                // Don't recommend tiny conversions
+                if (optimal < 5000) optimal = 0;
+                
+                return {
+                    scenarios,
+                    currentConversion,
+                    baseTaxableIncome: Math.round(baseTaxableIncome),
+                    roomTo12: Math.round(roomTo12),
+                    roomTo22: Math.round(roomTo22),
+                    roomToIRMAA: Math.round(roomToIRMAA),
+                    optimal: Math.round(optimal),
+                    optimalReason,
+                    irmaaThreshold: Math.round(irmaaThreshold),
+                    yourAge
+                };
+            }, [projectionData, inputs]);
+            
+            // ============ GUARDRAILS ANALYSIS ============
+            const guardrailsAnalysis = useMemo(() => {
+                if (projectionData.length === 0) return null;
+                
+                const firstYear = projectionData[0];
+                if (!firstYear) return null;
+                
+                // Guardrail parameters (based on Guyton-Klinger / Vanguard dynamic spending)
+                const floorRate = 0.04;    // 4% - minimum safe withdrawal rate
+                const ceilingRate = 0.06;  // 6% - maximum withdrawal rate  
+                const initialRate = 0.05;  // 5% - target initial withdrawal rate
+                const adjustmentPercent = 0.10; // 10% adjustment when hitting guardrails
+                
+                // Current portfolio value (start of year 1)
+                const totalPortfolio = inputs.brokerageStart + inputs.traditional401kStart + 
+                                       inputs.roth401kStart + inputs.hsaStart;
+                
+                // Current planned spending (inflation-adjusted for year 1)
+                const currentSpending = firstYear.need;
+                
+                // Calculate current withdrawal rate (spending / portfolio)
+                // Note: This is spending from portfolio, so we subtract SS
+                const ssIncome = firstYear.ss;
+                const spendingFromPortfolio = Math.max(0, currentSpending - ssIncome);
+                const currentWithdrawalRate = totalPortfolio > 0 ? spendingFromPortfolio / totalPortfolio : 0;
+                
+                // Calculate guardrail boundaries
+                const floorSpending = totalPortfolio * floorRate + ssIncome;
+                const ceilingSpending = totalPortfolio * ceilingRate + ssIncome;
+                const targetSpending = totalPortfolio * initialRate + ssIncome;
+                
+                // Determine status and recommendation
+                let status = 'normal';
+                let recommendation = '';
+                let adjustedSpending = currentSpending;
+                let color = '#10b981'; // green
+                
+                if (currentWithdrawalRate > ceilingRate) {
+                    status = 'above_ceiling';
+                    color = '#ef4444'; // red
+                    adjustedSpending = currentSpending * (1 - adjustmentPercent);
+                    recommendation = `Reduce spending by ${(adjustmentPercent * 100).toFixed(0)}% to protect portfolio longevity.`;
+                } else if (currentWithdrawalRate < floorRate && currentWithdrawalRate > 0) {
+                    status = 'below_floor';
+                    color = '#3b82f6'; // blue
+                    adjustedSpending = currentSpending * (1 + adjustmentPercent);
+                    recommendation = `You can increase spending by ${(adjustmentPercent * 100).toFixed(0)}% - portfolio is doing well!`;
+                } else if (currentWithdrawalRate <= ceilingRate && currentWithdrawalRate >= floorRate) {
+                    status = 'normal';
+                    color = '#10b981'; // green
+                    recommendation = 'Spending is within safe guardrails. No adjustment needed.';
+                } else {
+                    status = 'no_withdrawal';
+                    color = '#10b981';
+                    recommendation = 'SS covers expenses - no portfolio withdrawal needed.';
+                }
+                
+                // Calculate spending at different portfolio scenarios
+                const scenarios = [];
+                for (let portfolioChange = -40; portfolioChange <= 40; portfolioChange += 10) {
+                    const scenarioPortfolio = totalPortfolio * (1 + portfolioChange / 100);
+                    const scenarioFloor = scenarioPortfolio * floorRate + ssIncome;
+                    const scenarioCeiling = scenarioPortfolio * ceilingRate + ssIncome;
+                    const scenarioTarget = scenarioPortfolio * initialRate + ssIncome;
+                    
+                    scenarios.push({
+                        portfolioChange,
+                        portfolio: scenarioPortfolio,
+                        floor: scenarioFloor,
+                        ceiling: scenarioCeiling,
+                        target: scenarioTarget
+                    });
+                }
+                
+                // Calculate position in gauge (0-100)
+                const gaugeMin = floorRate * 0.5;
+                const gaugeMax = ceilingRate * 1.5;
+                const gaugePosition = Math.max(0, Math.min(100, 
+                    ((currentWithdrawalRate - gaugeMin) / (gaugeMax - gaugeMin)) * 100
+                ));
+                const floorPosition = ((floorRate - gaugeMin) / (gaugeMax - gaugeMin)) * 100;
+                const ceilingPosition = ((ceilingRate - gaugeMin) / (gaugeMax - gaugeMin)) * 100;
+                
+                return {
+                    totalPortfolio,
+                    currentSpending,
+                    ssIncome,
+                    spendingFromPortfolio,
+                    currentWithdrawalRate,
+                    floorRate,
+                    ceilingRate,
+                    initialRate,
+                    floorSpending,
+                    ceilingSpending,
+                    targetSpending,
+                    status,
+                    color,
+                    recommendation,
+                    adjustedSpending,
+                    adjustmentPercent,
+                    scenarios,
+                    gaugePosition,
+                    floorPosition,
+                    ceilingPosition
+                };
+            }, [projectionData, inputs]);
+            
+            // ============ MONTE CARLO SIMULATION ============
+            const [monteCarloParams, setMonteCarloParams] = useState({
+                numSimulations: 1000,
+                returnMean: 7,
+                returnStdDev: 15,  // 1 sigma
+                successThreshold: 1000000,
+                useGuardrails: false,  // Apply dynamic spending adjustments
+                oneWayGuardrails: false,  // Only decrease spending, never increase
+                autoDecrease: true,  // Use automatic 10% per occurrence logic
+                decreasePercent: 20,  // Maximum total decrease percentage (when not auto)
+                runSimulation: 0  // increment to trigger re-run
+            });
+            
+            const monteCarloResults = useMemo(() => {
+                if (projectionData.length === 0) return null;
+                
+                const { numSimulations, returnMean, returnStdDev, successThreshold, useGuardrails, oneWayGuardrails, autoDecrease, decreasePercent } = monteCarloParams;
+                
+                // Guardrail parameters
+                const floorRate = 0.04;    // 4% - increase spending if below
+                const ceilingRate = 0.06;  // 6% - decrease spending if above
+                const adjustmentPct = 0.10; // 10% adjustment
+                
+                // Starting balances
+                const startBrk = inputs.brokerageStart;
+                const startT401k = inputs.traditional401kStart;
+                const startRoth = inputs.roth401kStart;
+                const startHsa = inputs.hsaStart;
+                const startTotal = startBrk + startT401k + startRoth + startHsa;
+                
+                // Use projection data to get spending needs, SS, etc. for each year
+                const years = projectionData.length;
+                
+                // Box-Muller transform for standard normal distribution
+                const randomStandardNormal = () => {
+                    const u1 = Math.random();
+                    const u2 = Math.random();
+                    return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+                };
+                
+                // Log-normal return generator
+                // Stock prices follow Geometric Brownian Motion: S(t) = S(0) * exp((μ - σ²/2)t + σW(t))
+                // This creates natural upward drift with realistic crash/recovery dynamics
+                const generateLogNormalReturn = (meanPct, stdDevPct) => {
+                    const mu = meanPct / 100;      // Convert to decimal
+                    const sigma = stdDevPct / 100;
+                    
+                    // For log-normal: the log of (1 + return) is normally distributed
+                    // Adjust mean to account for the volatility drag: μ - σ²/2
+                    const logMean = Math.log(1 + mu) - (sigma * sigma) / 2;
+                    const logStdDev = sigma;
+                    
+                    // Generate log-normal return
+                    const z = randomStandardNormal();
+                    const logReturn = logMean + logStdDev * z;
+                    
+                    // Return is exp(logReturn) - 1
+                    return Math.exp(logReturn) - 1;
+                };
+                
+                // Calculate accumulation years (before retirement)
+                const accumulationYears = Math.max(0, inputs.startYear - inputs.todayYear);
+                
+                // Run simulations
+                const results = [];
+                const finalBalances = [];
+                const failureYears = [];
+                
+                for (let sim = 0; sim < numSimulations; sim++) {
+                    let brk = startBrk;
+                    let t401k = startT401k;
+                    let roth = startRoth;
+                    let hsa = startHsa;
+                    let failed = false;
+                    let failYear = -1;
+                    
+                    // Accumulation phase - grow with random returns, no withdrawals
+                    for (let accYr = 0; accYr < accumulationYears; accYr++) {
+                        const annualReturn = generateLogNormalReturn(returnMean, returnStdDev);
+                        brk = brk * (1 + annualReturn);
+                        t401k = t401k * (1 + annualReturn);
+                        roth = roth * (1 + annualReturn);
+                        hsa = hsa * (1 + annualReturn);
+                    }
+                    
+                    // Track guardrail adjustments for this simulation
+                    let currentSpendingMultiplier = 1.0;  // Tracks cumulative adjustments
+                    let yearsReduced = 0;
+                    let yearsIncreased = 0;
+                    let minSpendingMultiplier = 1.0;
+                    
+                    // Withdrawal phase
+                    for (let yr = 0; yr < years; yr++) {
+                        const yearData = projectionData[yr];
+                        
+                        // Skip accumulation years in withdrawal logic
+                        if (yearData.isAccumulation) continue;
+                        
+                        // Generate log-normal return for this year (positive skew, upward drift)
+                        const annualReturn = generateLogNormalReturn(returnMean, returnStdDev);
+                        
+                        const totalBal = brk + t401k + roth + hsa;
+                        
+                        // Calculate how much we need to withdraw
+                        // Need = spending need from deterministic model, minus SS income
+                        const ssIncome = yearData.ss || 0;
+                        let spendingNeed = yearData.need || 0;
+                        
+                        // Apply guardrails if enabled
+                        if (useGuardrails && totalBal > 0 && spendingNeed > ssIncome) {
+                            const withdrawalFromPortfolio = (spendingNeed * currentSpendingMultiplier) - ssIncome;
+                            const currentRate = withdrawalFromPortfolio / totalBal;
+                            
+                            if (currentRate > ceilingRate) {
+                                // Spending too high - reduce by 10%
+                                currentSpendingMultiplier *= (1 - adjustmentPct);
+                                yearsReduced++;
+                            } else if (currentRate < floorRate && !oneWayGuardrails) {
+                                // Spending too low - can increase by 10% (only if not one-way)
+                                currentSpendingMultiplier *= (1 + adjustmentPct);
+                                yearsIncreased++;
+                            }
+                            
+                            // Cap multiplier to reasonable bounds
+                            if (autoDecrease) {
+                                // Auto mode: 50% to 150% of original (existing logic)
+                                currentSpendingMultiplier = Math.max(0.5, Math.min(1.5, currentSpendingMultiplier));
+                            } else {
+                                // Manual mode: use specified decrease percentage as floor
+                                const minMultiplier = 1 - (decreasePercent / 100);
+                                currentSpendingMultiplier = Math.max(minMultiplier, Math.min(1.5, currentSpendingMultiplier));
+                            }
+                            minSpendingMultiplier = Math.min(minSpendingMultiplier, currentSpendingMultiplier);
+                            
+                            // Apply the multiplier to spending
+                            spendingNeed = spendingNeed * currentSpendingMultiplier;
+                        }
+                        
+                        const withdrawalNeeded = Math.max(0, spendingNeed - ssIncome);
+                        
+                        // Simple withdrawal strategy: withdraw proportionally from all accounts
+                        let wBrk = 0, w401k = 0, wRoth = 0, wHsa = 0;
+                        
+                        if (withdrawalNeeded > 0 && totalBal > 0) {
+                            // Withdraw proportionally from each account
+                            const brkRatio = brk / totalBal;
+                            const t401kRatio = t401k / totalBal;
+                            const rothRatio = roth / totalBal;
+                            const hsaRatio = hsa / totalBal;
+                            
+                            wBrk = Math.min(withdrawalNeeded * brkRatio, brk);
+                            w401k = Math.min(withdrawalNeeded * t401kRatio, t401k);
+                            wRoth = Math.min(withdrawalNeeded * rothRatio, roth);
+                            wHsa = Math.min(withdrawalNeeded * hsaRatio, hsa);
+                            
+                            // Check if we can meet spending need (with guardrails, use adjusted spending)
+                            const totalWithdrawal = wBrk + w401k + wRoth + wHsa + ssIncome;
+                            if (totalWithdrawal < spendingNeed * 0.9 && spendingNeed > 0) {
+                                failed = true;
+                                if (failYear === -1) failYear = yr;
+                            }
+                        }
+                        
+                        // Apply withdrawals and returns
+                        brk = Math.max(0, (brk - wBrk) * (1 + annualReturn));
+                        t401k = Math.max(0, (t401k - w401k) * (1 + annualReturn));
+                        roth = Math.max(0, (roth - wRoth) * (1 + annualReturn));
+                        hsa = Math.max(0, (hsa - wHsa) * (1 + annualReturn));
+                        
+                        // Check for bankruptcy
+                        if (brk + t401k + roth + hsa <= 0 && withdrawalNeeded > ssIncome) {
+                            failed = true;
+                            if (failYear === -1) failYear = yr;
+                            break;
+                        }
+                    }
+                    
+                    const finalBalance = brk + t401k + roth + hsa;
+                    finalBalances.push(finalBalance);
+                    
+                    const success = finalBalance >= successThreshold && !failed;
+                    results.push({
+                        finalBalance,
+                        success,
+                        failed,
+                        failYear,
+                        yearsReduced,
+                        yearsIncreased,
+                        minSpendingMultiplier
+                    });
+                }
+                
+                // Calculate statistics
+                const successCount = results.filter(r => r.success).length;
+                const successRate = successCount / numSimulations;
+                
+                const sortedBalances = [...finalBalances].sort((a, b) => a - b);
+                const percentile = (p) => sortedBalances[Math.floor(p * numSimulations)] || 0;
+                
+                const avgBalance = finalBalances.reduce((a, b) => a + b, 0) / numSimulations;
+                const minBalance = Math.min(...finalBalances);
+                const maxBalance = Math.max(...finalBalances);
+                
+                // Build histogram buckets - limit to 20 buckets max
+                const histogramBuckets = [];
+                const numBuckets = 20;
+                const range = maxBalance - minBalance;
+                const bucketSize = range > 0 ? Math.max(100000, Math.ceil(range / numBuckets / 100000) * 100000) : 500000;
+                const maxBucketValue = Math.min(minBalance + bucketSize * numBuckets, maxBalance + bucketSize);
+                
+                for (let i = 0; i < numBuckets; i++) {
+                    const bucketMin = minBalance + i * bucketSize;
+                    const bucketMax = bucketMin + bucketSize;
+                    if (bucketMin > maxBalance) break;
+                    const count = finalBalances.filter(b => b >= bucketMin && b < bucketMax).length;
+                    histogramBuckets.push({ min: bucketMin, max: bucketMax, count, pct: count / numSimulations });
+                }
+                
+                // Failure analysis
+                const failedRuns = results.filter(r => r.failed);
+                const failureRate = failedRuns.length / numSimulations;
+                const avgFailureYear = failedRuns.length > 0 
+                    ? failedRuns.reduce((sum, r) => sum + r.failYear, 0) / failedRuns.length 
+                    : null;
+                
+                // Guardrails analysis
+                const avgYearsReduced = results.reduce((sum, r) => sum + r.yearsReduced, 0) / numSimulations;
+                const avgYearsIncreased = results.reduce((sum, r) => sum + r.yearsIncreased, 0) / numSimulations;
+                const avgMinSpending = results.reduce((sum, r) => sum + r.minSpendingMultiplier, 0) / numSimulations;
+                const worstMinSpending = Math.min(...results.map(r => r.minSpendingMultiplier));
+                
+                return {
+                    numSimulations,
+                    successRate,
+                    successCount,
+                    failureRate,
+                    avgFailureYear,
+                    avgBalance,
+                    minBalance,
+                    maxBalance,
+                    percentile5: percentile(0.05),
+                    percentile10: percentile(0.10),
+                    percentile25: percentile(0.25),
+                    percentile50: percentile(0.50),
+                    percentile75: percentile(0.75),
+                    percentile90: percentile(0.90),
+                    percentile95: percentile(0.95),
+                    histogramBuckets,
+                    successThreshold,
+                    returnMean,
+                    returnStdDev,
+                    useGuardrails,
+                    avgYearsReduced,
+                    avgYearsIncreased,
+                    avgMinSpending,
+                    worstMinSpending
+                };
+            }, [projectionData, inputs, monteCarloParams]);
+            
+            const [showMonteCarlo, setShowMonteCarlo] = useState(false);
+            
+            // ============ CSV DOWNLOAD ============
+            const downloadCSV = () => {
+                const headers = [
+                    'Year', 'Your Age', 'Spouse Age', 'Married',
+                    '401k Withdrawal', 'Brokerage Withdrawal', 'Roth Withdrawal', 'HSA Withdrawal',
+                    'Social Security', 'SS Taxable', 'LTCG', 'RMD', 'Roth Conversion',
+                    'Ordinary Tax', 'LTCG Tax', 'NIIT', 'Penalty', 'State Tax', 'Total Tax',
+                    'Healthcare Cost', 'Effective Rate',
+                    'Brokerage Balance', '401k Balance', 'Roth Balance', 'HSA Balance', 'Total Balance',
+                    'Healthcare Type', 'Children On Plan', 'ACA Cost', 'Medicare Cost', 'IRMAA Cost', 'IRMAA Tier', 'IRMAA MAGI (2yr lookback)', 'Supplemental Cost',
+                    'Gross Income', 'Net Income', 'Need', 'Excess', 'Shortfall'
+                ];
+                
+                const rows = projectionData.map(r => [
+                    r.year, r.yourAge, r.spouseAge, r.isMarried ? 'Yes' : 'No',
+                    r.w401k, r.wBrk, r.wRoth, r.wHSA,
+                    r.ss, r.ssTaxable, r.ltcg, r.rmd, r.conv,
+                    r.ordinaryTax, r.ltcgTax, r.niit, r.penalty, r.stateTax, r.totalTax,
+                    r.healthCost, (r.effectiveRate * 100).toFixed(1) + '%',
+                    r.brkEnd, r.t401kEnd, r.rothEnd, r.hsaEnd, r.totalBalance,
+                    r.healthcareType, r.childrenOnPlan, r.acaCost, r.medicareCost, r.irmaaCost, r.irmaaTier, r.irmaaMagi, r.supplementalCost,
+                    r.grossIncome, r.netIncome, r.need, r.excess, r.shortfall
+                ]);
+                
+                const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `retirement-projection-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+            
+            // ============ RENDER ============
+            return (
+                <div className="min-h-screen p-4 md:p-6 max-w-7xl mx-auto fade-in">
+                    {/* Header */}
+                    <div className="mb-6">
+                        <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">
+                            Retirement Tax Optimizer
+                        </h1>
+                        <p className="text-gray-400">
+                            Advanced projection with tax-optimized withdrawal strategy
+                        </p>
+                    </div>
+                    
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+                        <div className="stat-card">
+                            <div className="text-xs text-gray-400 uppercase tracking-wide">Lifetime Tax</div>
+                            <div className="text-xl font-bold text-red-400 mono">{formatCurrency(summary.tax, true)}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="text-xs text-gray-400 uppercase tracking-wide">Avg Tax Rate</div>
+                            <div className="text-xl font-bold text-amber-400 mono">{(summary.avgEffectiveRate * 100).toFixed(1)}%</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="text-xs text-gray-400 uppercase tracking-wide">Healthcare</div>
+                            <div className="text-xl font-bold text-purple-400 mono">{formatCurrency(summary.health, true)}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="text-xs text-gray-400 uppercase tracking-wide">Conversions</div>
+                            <div className="text-xl font-bold text-blue-400 mono">{formatCurrency(summary.conv, true)}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="text-xs text-gray-400 uppercase tracking-wide">Final Balance</div>
+                            <div className="text-xl font-bold text-green-400 mono">{formatCurrency(summary.finalBalance, true)}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="text-xs text-gray-400 uppercase tracking-wide">Years</div>
+                            <div className="text-xl font-bold text-gray-300 mono">{summary.years}</div>
+                        </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap gap-2 mb-6">
+                        <button 
+                            onClick={() => setShowInputs(!showInputs)} 
+                            className={showInputs ? "btn-primary" : "btn-secondary"}
+                        >
+                            {showInputs ? '▼ Hide Inputs' : '▶ Show Inputs'}
+                        </button>
+                        <button onClick={downloadCSV} className="btn-success">
+                            ↓ Download CSV
+                        </button>
+                        <button 
+                            onClick={() => setShowDetails(!showDetails)} 
+                            className="btn-secondary"
+                        >
+                            {showDetails ? 'Simple View' : 'Detailed View'}
+                        </button>
+                        <button 
+                            onClick={() => window.open('retirement-optimizer-instructions.html', '_blank', 'width=900,height=700')}
+                            className="btn-secondary"
+                        >
+                            📖 Instructions
+                        </button>
+                        <button 
+                            onClick={() => setShowSweetSpot(!showSweetSpot)} 
+                            className={showSweetSpot ? "btn-primary" : "btn-secondary"}
+                        >
+                            {showSweetSpot ? '▼ Hide Roth Analysis' : '🎯 Roth Sweet Spot'}
+                        </button>
+                        <button 
+                            onClick={() => setShowGuardrails(!showGuardrails)} 
+                            className={showGuardrails ? "btn-primary" : "btn-secondary"}
+                        >
+                            {showGuardrails ? '▼ Hide Guardrails' : '📊 Guardrails'}
+                        </button>
+                        <button 
+                            onClick={() => setShowMonteCarlo(!showMonteCarlo)} 
+                            className={showMonteCarlo ? "btn-primary" : "btn-secondary"}
+                        >
+                            {showMonteCarlo ? '▼ Hide Monte Carlo' : '🎲 Monte Carlo'}
+                        </button>
+                    </div>
+                    
+                    {/* Monte Carlo Simulation Panel */}
+                    {showMonteCarlo && monteCarloResults && (
+                        <div className="card mb-6 fade-in" style={{background: 'linear-gradient(135deg, #1e2a3a 0%, #1a2332 100%)'}}>
+                            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px'}}>
+                                <span style={{fontSize: '20px'}}>🎲</span>
+                                <h3 style={{color: 'white', fontSize: '16px', fontWeight: '600', margin: 0}}>
+                                    Monte Carlo Simulation ({monteCarloResults.numSimulations.toLocaleString()} runs)
+                                </h3>
+                            </div>
+                            
+                            {/* Parameters */}
+                            <div style={{display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'flex-end'}}>
+                                <div>
+                                    <div style={{color: '#9ca3af', fontSize: '11px', marginBottom: '4px'}}>Mean Return %</div>
+                                    <input type="number" step={0.5} value={monteCarloParams.returnMean}
+                                        onChange={(e) => setMonteCarloParams(p => ({...p, returnMean: parseFloat(e.target.value) || 0}))}
+                                        className="compact-input" style={{width: '70px'}} />
+                                </div>
+                                <div>
+                                    <div style={{color: '#9ca3af', fontSize: '11px', marginBottom: '4px'}}>Std Dev (σ) %</div>
+                                    <input type="number" step={1} value={monteCarloParams.returnStdDev}
+                                        onChange={(e) => setMonteCarloParams(p => ({...p, returnStdDev: parseFloat(e.target.value) || 0}))}
+                                        className="compact-input" style={{width: '70px'}} />
+                                </div>
+                                <div>
+                                    <div style={{color: '#9ca3af', fontSize: '11px', marginBottom: '4px'}}>Success Target $</div>
+                                    <input type="number" step={100000} value={monteCarloParams.successThreshold}
+                                        onChange={(e) => setMonteCarloParams(p => ({...p, successThreshold: parseFloat(e.target.value) || 0}))}
+                                        className="compact-input" style={{width: '100px'}} />
+                                </div>
+                                <div>
+                                    <div style={{color: '#9ca3af', fontSize: '11px', marginBottom: '4px'}}>Simulations</div>
+                                    <select value={monteCarloParams.numSimulations}
+                                        onChange={(e) => setMonteCarloParams(p => ({...p, numSimulations: parseInt(e.target.value)}))}
+                                        className="compact-input" style={{width: '90px'}}>
+                                        <option value={100}>100</option>
+                                        <option value={500}>500</option>
+                                        <option value={1000}>1,000</option>
+                                        <option value={5000}>5,000</option>
+                                        <option value={10000}>10,000</option>
+                                    </select>
+                                </div>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                                    <input type="checkbox" id="useGuardrails" checked={monteCarloParams.useGuardrails}
+                                        onChange={(e) => setMonteCarloParams(p => ({...p, useGuardrails: e.target.checked}))}
+                                        style={{width: '16px', height: '16px'}} />
+                                    <label htmlFor="useGuardrails" style={{color: '#d1d5db', fontSize: '12px', cursor: 'pointer'}}>
+                                        Use Guardrails
+                                    </label>
+                                </div>
+                                {monteCarloParams.useGuardrails && (
+                                    <>
+                                        <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                                            <input type="checkbox" id="oneWayGuardrails" checked={monteCarloParams.oneWayGuardrails}
+                                                onChange={(e) => setMonteCarloParams(p => ({...p, oneWayGuardrails: e.target.checked}))}
+                                                style={{width: '16px', height: '16px'}} />
+                                            <label htmlFor="oneWayGuardrails" style={{color: '#d1d5db', fontSize: '12px', cursor: 'pointer'}}>
+                                                Do Not Increase
+                                            </label>
+                                        </div>
+                                        <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                                            <input type="checkbox" id="autoDecrease" checked={monteCarloParams.autoDecrease}
+                                                onChange={(e) => setMonteCarloParams(p => ({...p, autoDecrease: e.target.checked}))}
+                                                style={{width: '16px', height: '16px'}} />
+                                            <label htmlFor="autoDecrease" style={{color: '#d1d5db', fontSize: '12px', cursor: 'pointer'}}>
+                                                Auto Calculate Spending
+                                            </label>
+                                        </div>
+                                        {!monteCarloParams.autoDecrease && (
+                                            <div>
+                                                <div style={{color: '#9ca3af', fontSize: '11px', marginBottom: '4px'}}>Max Decrease %</div>
+                                                <input type="number" step={5} min={5} max={50} value={monteCarloParams.decreasePercent}
+                                                    onChange={(e) => setMonteCarloParams(p => ({...p, decreasePercent: parseFloat(e.target.value) || 20}))}
+                                                    className="compact-input" style={{width: '70px'}} />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                                <button 
+                                    onClick={() => setMonteCarloParams(p => ({...p, runSimulation: p.runSimulation + 1}))}
+                                    className="btn-primary" style={{padding: '6px 12px', fontSize: '12px'}}>
+                                    🔄 Re-run
+                                </button>
+                            </div>
+                            
+                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px'}}>
+                                {/* Left: Success Rate & Key Stats */}
+                                <div>
+                                    {/* Big success rate */}
+                                    <div style={{textAlign: 'center', padding: '20px', background: monteCarloResults.successRate >= 0.8 ? '#10b981' : monteCarloResults.successRate >= 0.65 ? '#f59e0b' : '#ef4444', borderRadius: '12px', marginBottom: '16px'}}>
+                                        <div style={{color: 'rgba(255,255,255,0.8)', fontSize: '12px', marginBottom: '4px'}}>
+                                            SUCCESS RATE {monteCarloResults.useGuardrails && '(with Guardrails)'}
+                                        </div>
+                                        <div style={{color: 'white', fontSize: '48px', fontWeight: '700'}}>{(monteCarloResults.successRate * 100).toFixed(1)}%</div>
+                                        <div style={{color: 'rgba(255,255,255,0.8)', fontSize: '12px'}}>
+                                            {monteCarloResults.successCount.toLocaleString()} of {monteCarloResults.numSimulations.toLocaleString()} scenarios end with ≥{formatCurrency(monteCarloResults.successThreshold)}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Guardrails stats */}
+                                    {monteCarloResults.useGuardrails && (
+                                        <div style={{padding: '12px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px', marginBottom: '12px', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
+                                            <div style={{color: '#3b82f6', fontSize: '11px', marginBottom: '8px'}}>
+                                                📊 GUARDRAILS IMPACT {monteCarloParams.oneWayGuardrails && '(One-Way)'}
+                                            </div>
+                                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12px'}}>
+                                                <div>
+                                                    <span style={{color: '#9ca3af'}}>Avg years reduced: </span>
+                                                    <span style={{color: '#f59e0b', fontWeight: '600'}}>{monteCarloResults.avgYearsReduced.toFixed(1)}</span>
+                                                </div>
+                                                <div>
+                                                    <span style={{color: '#9ca3af'}}>Avg years increased: </span>
+                                                    <span style={{color: '#10b981', fontWeight: '600'}}>{monteCarloResults.avgYearsIncreased.toFixed(1)}</span>
+                                                </div>
+                                                <div>
+                                                    <span style={{color: '#9ca3af'}}>Avg min spending: </span>
+                                                    <span style={{color: '#d1d5db', fontWeight: '600'}}>{(monteCarloResults.avgMinSpending * 100).toFixed(0)}%</span>
+                                                </div>
+                                                <div>
+                                                    <span style={{color: '#9ca3af'}}>Worst case: </span>
+                                                    <span style={{color: '#ef4444', fontWeight: '600'}}>{(monteCarloResults.worstMinSpending * 100).toFixed(0)}%</span>
+                                                </div>
+                                            </div>
+                                            <div style={{color: '#6b7280', fontSize: '10px', marginTop: '8px'}}>
+                                                {monteCarloParams.autoDecrease 
+                                                    ? (monteCarloParams.oneWayGuardrails 
+                                                        ? 'Auto: Reduces 10% per occurrence when withdrawal rate > 6% (never increases, can go to 50%)'
+                                                        : 'Auto: Adjusts ±10% per occurrence when withdrawal rate crosses 4%/6% thresholds (50%-150%)')
+                                                    : (monteCarloParams.oneWayGuardrails
+                                                        ? `Manual: Reduces 10% per occurrence when withdrawal rate > 6% (never increases, max decrease: ${monteCarloParams.decreasePercent}%)`
+                                                        : `Manual: Adjusts ±10% per occurrence when withdrawal rate crosses 4%/6% (max decrease: ${monteCarloParams.decreasePercent}%, max increase: 50%)`)
+                                                }
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Return assumptions */}
+                                    <div style={{padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', marginBottom: '12px'}}>
+                                        <div style={{color: '#9ca3af', fontSize: '11px', marginBottom: '8px'}}>RETURN DISTRIBUTION (Log-Normal)</div>
+                                        <div style={{color: '#d1d5db', fontSize: '12px'}}>
+                                            Mean: <strong>{monteCarloResults.returnMean}%</strong> | 
+                                            Volatility: <strong>{monteCarloResults.returnStdDev}%</strong>
+                                        </div>
+                                        <div style={{color: '#6b7280', fontSize: '11px', marginTop: '4px'}}>
+                                            Uses log-normal returns (like real markets):<br/>
+                                            • Positive skew - more up years than down<br/>
+                                            • ~70% of years positive, ~30% negative<br/>
+                                            • Captures upward drift of equities over time
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Failure stats */}
+                                    {monteCarloResults.failureRate > 0 && (
+                                        <div style={{padding: '12px', background: 'rgba(239,68,68,0.1)', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.3)'}}>
+                                            <div style={{color: '#ef4444', fontSize: '11px', marginBottom: '4px'}}>⚠️ FAILURE SCENARIOS</div>
+                                            <div style={{color: '#d1d5db', fontSize: '12px'}}>
+                                                {(monteCarloResults.failureRate * 100).toFixed(1)}% of runs couldn't meet spending needs
+                                                {monteCarloResults.avgFailureYear && (
+                                                    <span> (avg failure at year {Math.round(monteCarloResults.avgFailureYear)})</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {/* Right: Distribution & Percentiles */}
+                                <div>
+                                    <div style={{color: '#9ca3af', fontSize: '12px', marginBottom: '8px'}}>FINAL BALANCE DISTRIBUTION</div>
+                                    
+                                    {/* Simple histogram */}
+                                    <div style={{height: '100px', display: 'flex', alignItems: 'flex-end', gap: '2px', marginBottom: '8px', padding: '0 4px'}}>
+                                        {monteCarloResults.histogramBuckets.map((bucket, i) => {
+                                            const maxPct = Math.max(...monteCarloResults.histogramBuckets.map(b => b.pct));
+                                            const height = maxPct > 0 ? (bucket.pct / maxPct) * 100 : 0;
+                                            const isSuccess = bucket.min >= monteCarloResults.successThreshold;
+                                            return (
+                                                <div key={i} style={{flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                                    <div style={{
+                                                        width: '100%', 
+                                                        height: `${height}%`, 
+                                                        background: isSuccess ? '#10b981' : '#6b7280',
+                                                        borderRadius: '2px 2px 0 0',
+                                                        minHeight: bucket.count > 0 ? '4px' : '0'
+                                                    }}></div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: '#6b7280', marginBottom: '16px'}}>
+                                        <span>{formatCurrency(monteCarloResults.minBalance)}</span>
+                                        <span>{formatCurrency(monteCarloResults.successThreshold)} (target)</span>
+                                        <span>{formatCurrency(monteCarloResults.maxBalance)}</span>
+                                    </div>
+                                    
+                                    {/* Percentiles table */}
+                                    <div style={{background: 'rgba(255,255,255,0.05)', borderRadius: '8px', overflow: 'hidden'}}>
+                                        <table style={{width: '100%', fontSize: '11px', borderCollapse: 'collapse'}}>
+                                            <thead>
+                                                <tr style={{background: 'rgba(255,255,255,0.1)'}}>
+                                                    <th style={{padding: '8px', textAlign: 'left', color: '#9ca3af'}}>Percentile</th>
+                                                    <th style={{padding: '8px', textAlign: 'right', color: '#9ca3af'}}>Final Balance</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+                                                    <td style={{padding: '6px 8px', color: '#ef4444'}}>5th (worst)</td>
+                                                    <td style={{padding: '6px 8px', textAlign: 'right', color: '#d1d5db'}}>{formatCurrency(monteCarloResults.percentile5)}</td>
+                                                </tr>
+                                                <tr style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+                                                    <td style={{padding: '6px 8px', color: '#f59e0b'}}>25th</td>
+                                                    <td style={{padding: '6px 8px', textAlign: 'right', color: '#d1d5db'}}>{formatCurrency(monteCarloResults.percentile25)}</td>
+                                                </tr>
+                                                <tr style={{borderTop: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)'}}>
+                                                    <td style={{padding: '6px 8px', color: 'white', fontWeight: '600'}}>50th (median)</td>
+                                                    <td style={{padding: '6px 8px', textAlign: 'right', color: 'white', fontWeight: '600'}}>{formatCurrency(monteCarloResults.percentile50)}</td>
+                                                </tr>
+                                                <tr style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+                                                    <td style={{padding: '6px 8px', color: '#10b981'}}>75th</td>
+                                                    <td style={{padding: '6px 8px', textAlign: 'right', color: '#d1d5db'}}>{formatCurrency(monteCarloResults.percentile75)}</td>
+                                                </tr>
+                                                <tr style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+                                                    <td style={{padding: '6px 8px', color: '#3b82f6'}}>95th (best)</td>
+                                                    <td style={{padding: '6px 8px', textAlign: 'right', color: '#d1d5db'}}>{formatCurrency(monteCarloResults.percentile95)}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Interpretation */}
+                            <div style={{marginTop: '16px', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px'}}>
+                                <div style={{color: '#9ca3af', fontSize: '11px', marginBottom: '4px'}}>💡 INTERPRETATION</div>
+                                <div style={{color: '#d1d5db', fontSize: '11px', lineHeight: '1.5'}}>
+                                    {monteCarloResults.successRate >= 0.8 
+                                        ? "Go ahead and retire! Your plan has a high probability of success. You can adapt if markets underperform."
+                                        : monteCarloResults.successRate >= 0.65 
+                                        ? "Proceed with flexibility. This can work if you're willing to adjust spending in bad years (use guardrails) or have backup options."
+                                        : "Consider adjustments. Reduce spending, delay retirement, increase savings, or plan for part-time work as a backup."
+                                    }
+                                    {" "}The 5th percentile ({formatCurrency(monteCarloResults.percentile5)}) represents a bad-but-plausible outcome.
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Guardrails Analysis Panel */}
+                    {showGuardrails && guardrailsAnalysis && (
+                        <div className="card mb-6 fade-in" style={{background: 'linear-gradient(135deg, #1e2a3a 0%, #1a2332 100%)'}}>
+                            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px'}}>
+                                <span style={{fontSize: '20px'}}>📊</span>
+                                <h3 style={{color: 'white', fontSize: '16px', fontWeight: '600', margin: 0}}>
+                                    Spending Guardrails Analysis (Year 1)
+                                </h3>
+                            </div>
+                            
+                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px'}}>
+                                {/* Left: Current Status */}
+                                <div>
+                                    <div style={{marginBottom: '16px'}}>
+                                        <div style={{color: '#9ca3af', fontSize: '12px', marginBottom: '4px'}}>TOTAL PORTFOLIO</div>
+                                        <div style={{color: 'white', fontSize: '18px', fontWeight: '600'}}>{formatCurrency(guardrailsAnalysis.totalPortfolio)}</div>
+                                    </div>
+                                    
+                                    <div style={{marginBottom: '16px'}}>
+                                        <div style={{color: '#9ca3af', fontSize: '12px', marginBottom: '4px'}}>CURRENT SPENDING NEED</div>
+                                        <div style={{color: 'white', fontSize: '18px', fontWeight: '600'}}>{formatCurrency(guardrailsAnalysis.currentSpending)}</div>
+                                        <div style={{color: '#6b7280', fontSize: '11px'}}>
+                                            (SS: {formatCurrency(guardrailsAnalysis.ssIncome)} + Portfolio: {formatCurrency(guardrailsAnalysis.spendingFromPortfolio)})
+                                        </div>
+                                    </div>
+                                    
+                                    <div style={{marginBottom: '16px'}}>
+                                        <div style={{color: '#9ca3af', fontSize: '12px', marginBottom: '4px'}}>WITHDRAWAL RATE (from portfolio)</div>
+                                        <div style={{color: guardrailsAnalysis.color, fontSize: '24px', fontWeight: '700'}}>
+                                            {(guardrailsAnalysis.currentWithdrawalRate * 100).toFixed(1)}%
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Gauge visualization */}
+                                    <div style={{marginBottom: '16px'}}>
+                                        <div style={{color: '#9ca3af', fontSize: '12px', marginBottom: '8px'}}>GUARDRAIL POSITION</div>
+                                        <div style={{position: 'relative', height: '30px', background: '#374151', borderRadius: '15px', overflow: 'hidden'}}>
+                                            {/* Floor zone (blue) */}
+                                            <div style={{position: 'absolute', left: 0, top: 0, bottom: 0, width: `${guardrailsAnalysis.floorPosition}%`, background: '#3b82f6', opacity: 0.3}}></div>
+                                            {/* Safe zone (green) */}
+                                            <div style={{position: 'absolute', left: `${guardrailsAnalysis.floorPosition}%`, top: 0, bottom: 0, width: `${guardrailsAnalysis.ceilingPosition - guardrailsAnalysis.floorPosition}%`, background: '#10b981', opacity: 0.3}}></div>
+                                            {/* Ceiling zone (red) */}
+                                            <div style={{position: 'absolute', left: `${guardrailsAnalysis.ceilingPosition}%`, top: 0, bottom: 0, right: 0, background: '#ef4444', opacity: 0.3}}></div>
+                                            {/* Current position marker */}
+                                            <div style={{position: 'absolute', left: `${guardrailsAnalysis.gaugePosition}%`, top: '2px', bottom: '2px', width: '4px', background: guardrailsAnalysis.color, borderRadius: '2px', transform: 'translateX(-50%)'}}></div>
+                                            {/* Labels */}
+                                            <div style={{position: 'absolute', left: `${guardrailsAnalysis.floorPosition}%`, top: '50%', transform: 'translate(-50%, -50%)', fontSize: '9px', color: 'white', fontWeight: '600'}}>4%</div>
+                                            <div style={{position: 'absolute', left: `${guardrailsAnalysis.ceilingPosition}%`, top: '50%', transform: 'translate(-50%, -50%)', fontSize: '9px', color: 'white', fontWeight: '600'}}>6%</div>
+                                        </div>
+                                        <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#6b7280', marginTop: '4px'}}>
+                                            <span>Underspending</span>
+                                            <span>Safe Zone</span>
+                                            <span>Overspending</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Recommendation */}
+                                    <div style={{padding: '16px', background: guardrailsAnalysis.color, borderRadius: '8px', opacity: 0.9}}>
+                                        <div style={{color: 'rgba(255,255,255,0.8)', fontSize: '12px', marginBottom: '4px'}}>RECOMMENDATION</div>
+                                        <div style={{color: 'white', fontSize: '14px', fontWeight: '500'}}>{guardrailsAnalysis.recommendation}</div>
+                                        {guardrailsAnalysis.status !== 'normal' && guardrailsAnalysis.status !== 'no_withdrawal' && (
+                                            <div style={{color: 'rgba(255,255,255,0.9)', fontSize: '13px', marginTop: '8px'}}>
+                                                Adjusted spending: <strong>{formatCurrency(guardrailsAnalysis.adjustedSpending)}</strong>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                {/* Right: Spending ranges table */}
+                                <div>
+                                    <div style={{color: '#9ca3af', fontSize: '12px', marginBottom: '8px'}}>SPENDING RANGES BY PORTFOLIO PERFORMANCE</div>
+                                    <div style={{background: 'rgba(255,255,255,0.05)', borderRadius: '8px', overflow: 'hidden'}}>
+                                        <table style={{width: '100%', fontSize: '11px', borderCollapse: 'collapse'}}>
+                                            <thead>
+                                                <tr style={{background: 'rgba(255,255,255,0.1)'}}>
+                                                    <th style={{padding: '8px', textAlign: 'left', color: '#9ca3af'}}>Portfolio</th>
+                                                    <th style={{padding: '8px', textAlign: 'right', color: '#3b82f6'}}>Floor (4%)</th>
+                                                    <th style={{padding: '8px', textAlign: 'right', color: '#10b981'}}>Target (5%)</th>
+                                                    <th style={{padding: '8px', textAlign: 'right', color: '#ef4444'}}>Ceiling (6%)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {guardrailsAnalysis.scenarios.filter(s => s.portfolioChange % 20 === 0).map((scenario, i) => (
+                                                    <tr key={i} style={{borderTop: '1px solid rgba(255,255,255,0.1)', background: scenario.portfolioChange === 0 ? 'rgba(255,255,255,0.1)' : 'transparent'}}>
+                                                        <td style={{padding: '8px', color: '#d1d5db'}}>
+                                                            {scenario.portfolioChange === 0 ? 'Current' : `${scenario.portfolioChange > 0 ? '+' : ''}${scenario.portfolioChange}%`}
+                                                            <div style={{fontSize: '10px', color: '#6b7280'}}>{formatCurrency(scenario.portfolio)}</div>
+                                                        </td>
+                                                        <td style={{padding: '8px', textAlign: 'right', color: '#3b82f6'}}>{formatCurrency(scenario.floor)}</td>
+                                                        <td style={{padding: '8px', textAlign: 'right', color: '#10b981'}}>{formatCurrency(scenario.target)}</td>
+                                                        <td style={{padding: '8px', textAlign: 'right', color: '#ef4444'}}>{formatCurrency(scenario.ceiling)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div style={{marginTop: '12px', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px'}}>
+                                        <div style={{color: '#9ca3af', fontSize: '11px', marginBottom: '4px'}}>💡 HOW TO USE GUARDRAILS</div>
+                                        <div style={{color: '#d1d5db', fontSize: '11px', lineHeight: '1.5'}}>
+                                            <strong>Floor (4%):</strong> If withdrawal rate drops below this, you can safely spend more.<br/>
+                                            <strong>Ceiling (6%):</strong> If rate exceeds this, consider reducing spending by 10%.<br/>
+                                            <strong>Recalculate annually</strong> based on actual portfolio value.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Roth Conversion Sweet Spot Analysis */}
+                    {showSweetSpot && conversionAnalysis && (
+                        <div className="card mb-6 fade-in" style={{background: 'linear-gradient(135deg, #1e2a3a 0%, #1a2332 100%)'}}>
+                            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px'}}>
+                                <span style={{fontSize: '20px'}}>🎯</span>
+                                <h3 style={{color: 'white', fontSize: '16px', fontWeight: '600', margin: 0}}>
+                                    Roth Conversion Sweet Spot Analysis (Year 1)
+                                </h3>
+                            </div>
+                            
+                            {conversionAnalysis.message ? (
+                                <p style={{color: '#9ca3af'}}>{conversionAnalysis.message}</p>
+                            ) : (
+                                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px'}}>
+                                    {/* Left: Recommendations */}
+                                    <div>
+                                        <div style={{marginBottom: '16px'}}>
+                                            <div style={{color: '#9ca3af', fontSize: '12px', marginBottom: '4px'}}>CURRENT TAXABLE INCOME</div>
+                                            <div style={{color: 'white', fontSize: '18px', fontWeight: '600'}}>{formatCurrency(conversionAnalysis.baseTaxableIncome)}</div>
+                                        </div>
+                                        
+                                        <div style={{marginBottom: '16px'}}>
+                                            <div style={{color: '#9ca3af', fontSize: '12px', marginBottom: '4px'}}>CURRENT CONVERSION (Year 1)</div>
+                                            <div style={{color: '#3b82f6', fontSize: '18px', fontWeight: '600'}}>{formatCurrency(conversionAnalysis.currentConversion)}</div>
+                                        </div>
+                                        
+                                        <div style={{padding: '16px', background: '#10b981', borderRadius: '8px', marginBottom: '16px'}}>
+                                            <div style={{color: 'rgba(255,255,255,0.8)', fontSize: '12px', marginBottom: '4px'}}>RECOMMENDED SWEET SPOT</div>
+                                            <div style={{color: 'white', fontSize: '24px', fontWeight: '700'}}>{formatCurrency(conversionAnalysis.optimal)}</div>
+                                            <div style={{color: 'rgba(255,255,255,0.9)', fontSize: '12px', marginTop: '4px'}}>{conversionAnalysis.optimalReason}</div>
+                                        </div>
+                                        
+                                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+                                            <div style={{padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px'}}>
+                                                <div style={{color: '#9ca3af', fontSize: '11px'}}>Room to 12%</div>
+                                                <div style={{color: '#10b981', fontSize: '14px', fontWeight: '600'}}>{formatCurrency(conversionAnalysis.roomTo12)}</div>
+                                            </div>
+                                            <div style={{padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px'}}>
+                                                <div style={{color: '#9ca3af', fontSize: '11px'}}>Room to 22%</div>
+                                                <div style={{color: '#f59e0b', fontSize: '14px', fontWeight: '600'}}>{formatCurrency(conversionAnalysis.roomTo22)}</div>
+                                            </div>
+                                            <div style={{padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', gridColumn: 'span 2'}}>
+                                                <div style={{color: '#9ca3af', fontSize: '11px'}}>Room to IRMAA Threshold ({conversionAnalysis.yourAge >= 63 ? 'applies in 2 yrs' : 'not yet relevant'})</div>
+                                                <div style={{color: conversionAnalysis.roomToIRMAA > 0 ? '#8b5cf6' : '#ef4444', fontSize: '14px', fontWeight: '600'}}>
+                                                    {conversionAnalysis.roomToIRMAA > 0 ? formatCurrency(conversionAnalysis.roomToIRMAA) : 'Already over threshold'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Right: Mini chart showing tax at different conversion levels */}
+                                    <div>
+                                        <div style={{color: '#9ca3af', fontSize: '12px', marginBottom: '8px'}}>TAX BY CONVERSION AMOUNT</div>
+                                        <svg width="100%" height="200" viewBox="0 0 300 200" style={{overflow: 'visible'}}>
+                                            {/* Chart background */}
+                                            <rect x="40" y="10" width="250" height="160" fill="rgba(255,255,255,0.02)" rx="4"/>
+                                            
+                                            {/* Grid lines */}
+                                            {[0, 1, 2, 3, 4].map(i => (
+                                                <line key={i} x1="40" y1={10 + i * 40} x2="290" y2={10 + i * 40} stroke="#374151" strokeWidth="1" strokeDasharray="4,4"/>
+                                            ))}
+                                            
+                                            {/* Plot tax amounts */}
+                                            {conversionAnalysis.scenarios && (() => {
+                                                const maxTax = Math.max(...conversionAnalysis.scenarios.map(s => s.tax));
+                                                const maxConv = Math.max(...conversionAnalysis.scenarios.map(s => s.conversion));
+                                                const points = conversionAnalysis.scenarios.map((s, i) => {
+                                                    const x = 40 + (s.conversion / maxConv) * 250;
+                                                    const y = 170 - (s.tax / maxTax) * 160;
+                                                    return `${x},${y}`;
+                                                }).join(' ');
+                                                
+                                                const optimalX = 40 + (conversionAnalysis.optimal / maxConv) * 250;
+                                                const optimalScenario = conversionAnalysis.scenarios.find(s => s.conversion >= conversionAnalysis.optimal) || conversionAnalysis.scenarios[0];
+                                                const optimalY = 170 - (optimalScenario.tax / maxTax) * 160;
+                                                
+                                                return (
+                                                    <>
+                                                        <polyline points={points} fill="none" stroke="#3b82f6" strokeWidth="2"/>
+                                                        {/* IRMAA threshold line */}
+                                                        {conversionAnalysis.roomToIRMAA > 0 && conversionAnalysis.roomToIRMAA < maxConv && (
+                                                            <>
+                                                                <line x1={40 + (conversionAnalysis.roomToIRMAA / maxConv) * 250} y1="10" 
+                                                                      x2={40 + (conversionAnalysis.roomToIRMAA / maxConv) * 250} y2="170" 
+                                                                      stroke="#ef4444" strokeWidth="2" strokeDasharray="4,4"/>
+                                                                <text x={40 + (conversionAnalysis.roomToIRMAA / maxConv) * 250} y="185" 
+                                                                      textAnchor="middle" style={{fontSize: '9px', fill: '#ef4444'}}>IRMAA</text>
+                                                            </>
+                                                        )}
+                                                        {/* Optimal point */}
+                                                        <circle cx={optimalX} cy={optimalY} r="6" fill="#10b981"/>
+                                                        <text x={optimalX} y={optimalY - 10} textAnchor="middle" style={{fontSize: '10px', fill: '#10b981'}}>Sweet Spot</text>
+                                                    </>
+                                                );
+                                            })()}
+                                            
+                                            {/* Y-axis label */}
+                                            <text x="15" y="90" textAnchor="middle" transform="rotate(-90, 15, 90)" style={{fontSize: '10px', fill: '#9ca3af'}}>Tax</text>
+                                            
+                                            {/* X-axis label */}
+                                            <text x="165" y="198" textAnchor="middle" style={{fontSize: '10px', fill: '#9ca3af'}}>Conversion Amount</text>
+                                        </svg>
+                                        
+                                        <div style={{marginTop: '12px', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px'}}>
+                                            <div style={{color: '#9ca3af', fontSize: '11px', marginBottom: '4px'}}>💡 TIP</div>
+                                            <div style={{color: '#d1d5db', fontSize: '12px'}}>
+                                                {conversionAnalysis.yourAge < 63 
+                                                    ? "You're under 63, so IRMAA won't affect you for a few years. Focus on filling lower tax brackets."
+                                                    : conversionAnalysis.roomToIRMAA > 50000
+                                                    ? "You have room to convert without triggering IRMAA surcharges in 2 years."
+                                                    : "Watch your IRMAA threshold - conversions now affect Medicare premiums in 2 years."
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
+
+                    {/* Inputs Panel + Chart */}
+                    {showInputs && (
+                        <div className="card mb-6 fade-in">
+                            <div style={{display: 'flex', flexDirection: 'row', gap: '24px'}}>
+                                {/* Left side: Compact form fields */}
+                                <div style={{width: '420px', flexShrink: 0}}>
+                                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
+                                        {/* Column 1 */}
+                                        <div className="space-y-1">
+                                            <div className="section-title text-xs pb-1">Accounts</div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Brokerage</span>
+                                                <input type="number" step={10000} value={inputs.brokerageStart} 
+                                                    onChange={(e) => handleInputChange('brokerageStart', e.target.value)} 
+                                                    className="compact-input" style={{width: '100px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>401k</span>
+                                                <input type="number" step={10000} value={inputs.traditional401kStart} 
+                                                    onChange={(e) => handleInputChange('traditional401kStart', e.target.value)} 
+                                                    className="compact-input" style={{width: '100px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Roth</span>
+                                                <input type="number" step={10000} value={inputs.roth401kStart} 
+                                                    onChange={(e) => handleInputChange('roth401kStart', e.target.value)} 
+                                                    className="compact-input" style={{width: '100px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>HSA</span>
+                                                <input type="number" step={1000} value={inputs.hsaStart} 
+                                                    onChange={(e) => handleInputChange('hsaStart', e.target.value)} 
+                                                    className="compact-input" style={{width: '100px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Basis %</span>
+                                                <input type="number" min={0} max={100} value={inputs.brokerageBasisPercent} 
+                                                    onChange={(e) => handleInputChange('brokerageBasisPercent', e.target.value)} 
+                                                    className="compact-input" style={{width: '60px'}} />
+                                            </div>
+                                            
+                                            <div className="section-title text-xs pb-1 pt-2">Timeline</div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Status</span>
+                                                <select value={inputs.filingStatus} onChange={(e) => handleInputChange('filingStatus', e.target.value)} 
+                                                    className="compact-input" style={{width: '90px'}}>
+                                                    <option value="married">Married</option>
+                                                    <option value="single">Single</option>
+                                                </select>
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Your Age</span>
+                                                <input type="number" value={inputs.yourAgeStart} 
+                                                    onChange={(e) => handleInputChange('yourAgeStart', e.target.value)} 
+                                                    className="compact-input" style={{width: '60px'}} />
+                                            </div>
+                                            {inputs.filingStatus === 'married' && (
+                                                <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                    <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Spouse Age</span>
+                                                    <input type="number" value={inputs.spouseAgeStart} 
+                                                        onChange={(e) => handleInputChange('spouseAgeStart', e.target.value)} 
+                                                        className="compact-input" style={{width: '60px'}} />
+                                                </div>
+                                            )}
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Today Year</span>
+                                                <input type="number" value={inputs.todayYear} 
+                                                    onChange={(e) => handleInputChange('todayYear', e.target.value)} 
+                                                    className="compact-input" style={{width: '70px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Retire Year</span>
+                                                <input type="number" value={inputs.startYear} 
+                                                    onChange={(e) => handleInputChange('startYear', e.target.value)} 
+                                                    className="compact-input" style={{width: '70px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Life Exp</span>
+                                                <input type="number" value={inputs.yourDeathAge} 
+                                                    onChange={(e) => handleInputChange('yourDeathAge', e.target.value)} 
+                                                    className="compact-input" style={{width: '60px'}} />
+                                            </div>
+                                            {inputs.filingStatus === 'married' && (
+                                                <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                    <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Spouse Life</span>
+                                                    <input type="number" value={inputs.spouseDeathAge} 
+                                                        onChange={(e) => handleInputChange('spouseDeathAge', e.target.value)} 
+                                                        className="compact-input" style={{width: '60px'}} />
+                                                </div>
+                                            )}
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>RMD Age</span>
+                                                <input type="number" value={inputs.rmdStartAge} 
+                                                    onChange={(e) => handleInputChange('rmdStartAge', e.target.value)} 
+                                                    className="compact-input" style={{width: '60px'}} />
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Column 2 */}
+                                        <div className="space-y-1">
+                                            <div className="section-title text-xs pb-1">Social Security</div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Your SS Age</span>
+                                                <select value={inputs.yourSSStartAge} onChange={(e) => handleInputChange('yourSSStartAge', e.target.value)} 
+                                                    className="compact-input" style={{width: '140px'}}>
+                                                    {Object.entries(SS_BENEFITS_YOU).map(([age, benefit]) => (
+                                                        <option key={age} value={age}>{age} → ${benefit.toLocaleString()}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            {inputs.filingStatus === 'married' && (
+                                                <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                    <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Spouse SS</span>
+                                                    <select value={inputs.spouseSSStartAge} onChange={(e) => handleInputChange('spouseSSStartAge', e.target.value)} 
+                                                        className="compact-input" style={{width: '140px'}}>
+                                                        {Object.entries(SS_BENEFITS_SPOUSE).map(([age, benefit]) => (
+                                                            <option key={age} value={age}>{age} → ${benefit.toLocaleString()}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            )}
+                                            
+                                            <div className="section-title text-xs pb-1 pt-2">Assumptions</div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Return %</span>
+                                                <input type="number" step={0.5} value={inputs.investmentReturn} 
+                                                    onChange={(e) => handleInputChange('investmentReturn', e.target.value)} 
+                                                    className="compact-input" style={{width: '60px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Inflation %</span>
+                                                <input type="number" step={0.5} value={inputs.inflationRate} 
+                                                    onChange={(e) => handleInputChange('inflationRate', e.target.value)} 
+                                                    className="compact-input" style={{width: '60px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Brkt Infl %</span>
+                                                <input type="number" step={0.5} value={inputs.taxBracketInflation} 
+                                                    onChange={(e) => handleInputChange('taxBracketInflation', e.target.value)} 
+                                                    className="compact-input" style={{width: '60px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Spending</span>
+                                                <input type="number" step={1000} value={inputs.realSpendingNeed} 
+                                                    onChange={(e) => handleInputChange('realSpendingNeed', e.target.value)} 
+                                                    className="compact-input" style={{width: '90px'}} />
+                                            </div>
+                                            {inputs.filingStatus === 'married' && (
+                                                <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                    <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Survivor $</span>
+                                                    <input type="number" step={1000} value={inputs.survivorSpendingNeed} 
+                                                        onChange={(e) => handleInputChange('survivorSpendingNeed', e.target.value)} 
+                                                        className="compact-input" style={{width: '90px'}} />
+                                                </div>
+                                            )}
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Target Brkt</span>
+                                                <select value={inputs.targetTaxBracket} onChange={(e) => handleInputChange('targetTaxBracket', e.target.value)} 
+                                                    className="compact-input" style={{width: '60px'}}>
+                                                    <option value={10}>10%</option>
+                                                    <option value={12}>12%</option>
+                                                    <option value={22}>22%</option>
+                                                    <option value={24}>24%</option>
+                                                </select>
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>State Tax %</span>
+                                                <input type="number" step={0.5} min={0} max={15} value={inputs.stateIncomeTax} 
+                                                    onChange={(e) => handleInputChange('stateIncomeTax', e.target.value)} 
+                                                    className="compact-input" style={{width: '60px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Suppl Hlth</span>
+                                                <input type="number" step={500} value={inputs.supplementalHealthcare} 
+                                                    onChange={(e) => handleInputChange('supplementalHealthcare', e.target.value)} 
+                                                    className="compact-input" style={{width: '80px'}} />
+                                            </div>
+                                            
+                                            {/* Bad Sequence Modeling */}
+                                            <div className="section-title text-xs pb-1 pt-2">Bad Sequence</div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Bad Ret %</span>
+                                                <input type="number" step={1} value={inputs.investmentReturnBad} 
+                                                    onChange={(e) => handleInputChange('investmentReturnBad', e.target.value)} 
+                                                    className="compact-input" style={{width: '60px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Start Year</span>
+                                                <input type="number" min={0} max={30} value={inputs.badSequenceStart} 
+                                                    onChange={(e) => handleInputChange('badSequenceStart', e.target.value)} 
+                                                    className="compact-input" style={{width: '50px'}} />
+                                            </div>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Duration</span>
+                                                <input type="number" min={0} max={10} value={inputs.badSequenceYears} 
+                                                    onChange={(e) => handleInputChange('badSequenceYears', e.target.value)} 
+                                                    className="compact-input" style={{width: '50px'}} />
+                                            </div>
+                                            
+                                            <div className="pt-2 space-y-1">
+                                                <CheckboxField label="Rule of 55" field="useRule55" checked={inputs.useRule55} onChange={handleCheckboxChange} />
+                                                <CheckboxField label="Aggressive Roth Conv" field="aggressiveConversion" checked={inputs.aggressiveConversion} onChange={handleCheckboxChange} />
+                                            </div>
+                                            
+                                            {/* Children */}
+                                            <div className="pt-2">
+                                                <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                                    <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Children</span>
+                                                    <select value={inputs.numChildren} onChange={(e) => handleInputChange('numChildren', e.target.value)} 
+                                                        className="compact-input" style={{width: '50px'}}>
+                                                        <option value={0}>0</option>
+                                                        <option value={1}>1</option>
+                                                        <option value={2}>2</option>
+                                                        <option value={3}>3</option>
+                                                        <option value={4}>4</option>
+                                                    </select>
+                                                </div>
+                                                {inputs.numChildren >= 1 && (
+                                                    <div style={{display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px'}}>
+                                                        <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Child 1 Age</span>
+                                                        <input type="number" min={0} max={25} value={inputs.childAge1} 
+                                                            onChange={(e) => handleInputChange('childAge1', e.target.value)} 
+                                                            className="compact-input" style={{width: '50px'}} />
+                                                    </div>
+                                                )}
+                                                {inputs.numChildren >= 2 && (
+                                                    <div style={{display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px'}}>
+                                                        <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Child 2 Age</span>
+                                                        <input type="number" min={0} max={25} value={inputs.childAge2} 
+                                                            onChange={(e) => handleInputChange('childAge2', e.target.value)} 
+                                                            className="compact-input" style={{width: '50px'}} />
+                                                    </div>
+                                                )}
+                                                {inputs.numChildren >= 3 && (
+                                                    <div style={{display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px'}}>
+                                                        <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Child 3 Age</span>
+                                                        <input type="number" min={0} max={25} value={inputs.childAge3} 
+                                                            onChange={(e) => handleInputChange('childAge3', e.target.value)} 
+                                                            className="compact-input" style={{width: '50px'}} />
+                                                    </div>
+                                                )}
+                                                {inputs.numChildren >= 4 && (
+                                                    <div style={{display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px'}}>
+                                                        <span className="text-gray-400" style={{width: '70px', fontSize: '11px'}}>Child 4 Age</span>
+                                                        <input type="number" min={0} max={25} value={inputs.childAge4} 
+                                                            onChange={(e) => handleInputChange('childAge4', e.target.value)} 
+                                                            className="compact-input" style={{width: '50px'}} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Right side: Balance Chart */}
+                                <div style={{flexGrow: 1, minWidth: 0}}>
+                                    <BalanceChart data={projectionData} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    
+                    {/* Alerts */}
+                    {summary.shortfall > 0 && (
+                        <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mb-6">
+                            <div className="font-semibold text-red-400">⚠️ Funding Shortfall Detected</div>
+                            <div className="text-sm text-red-300">
+                                Your plan shows {formatCurrency(summary.shortfall)} in total shortfalls. 
+                                Consider reducing spending, delaying retirement, or increasing savings.
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Data Table */}
+                    <div className="card overflow-hidden">
+                        <div className="overflow-x-auto max-h-[600px]">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Year</th>
+                                        <th>{inputs.filingStatus === 'married' ? 'Ages' : 'Age'}</th>
+                                        <th>401k W</th>
+                                        <th>Brk W</th>
+                                        <th>Roth W</th>
+                                        {showDetails && <th>HSA W</th>}
+                                        <th>SS</th>
+                                        {showDetails && <th>SS Tax</th>}
+                                        <th>Tax</th>
+                                        {showDetails && (
+                                            <>
+                                                <th>NIIT</th>
+                                                <th>State</th>
+                                            </>
+                                        )}
+                                        <th>Health</th>
+                                        {showDetails && (
+                                            <>
+                                                <th>Type</th>
+                                                <th>ACA</th>
+                                                <th>Medicare</th>
+                                                <th>IRMAA</th>
+                                                <th>Suppl</th>
+                                            </>
+                                        )}
+                                        <th>Rate</th>
+                                        <th>Spendable</th>
+                                        {showDetails && <th>Conv</th>}
+                                        <th>Brk Bal</th>
+                                        <th>401k Bal</th>
+                                        <th>Roth Bal</th>
+                                        {showDetails && <th>HSA Bal</th>}
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="mono">
+                                    {projectionData.map((row, i) => (
+                                        <tr key={i} style={row.isAccumulation ? {background: 'rgba(59, 130, 246, 0.1)'} : {}}>
+                                            <td className="font-medium">
+                                                {row.year}
+                                                {row.isAccumulation && <span style={{color: '#3b82f6', fontSize: '10px', marginLeft: '4px'}}>●</span>}
+                                            </td>
+                                            <td>{inputs.filingStatus === 'married' ? `${row.yourAge}/${row.spouseAge}` : row.yourAge}</td>
+                                            <td>{row.isAccumulation ? <span style={{color: '#6b7280'}}>—</span> : formatCurrency(row.w401k, true)}</td>
+                                            <td>{row.isAccumulation ? <span style={{color: '#6b7280'}}>—</span> : formatCurrency(row.wBrk, true)}</td>
+                                            <td>{row.isAccumulation ? <span style={{color: '#6b7280'}}>—</span> : formatCurrency(row.wRoth, true)}</td>
+                                            {showDetails && <td>{row.isAccumulation ? <span style={{color: '#6b7280'}}>—</span> : formatCurrency(row.wHSA, true)}</td>}
+                                            <td>{row.isAccumulation ? <span style={{color: '#6b7280'}}>—</span> : formatCurrency(row.ss, true)}</td>
+                                            {showDetails && <td className="text-gray-500">{row.isAccumulation ? '—' : formatCurrency(row.ssTaxable, true)}</td>}
+                                            <td className="text-red-400">{row.isAccumulation ? <span style={{color: '#6b7280'}}>—</span> : formatCurrency(row.totalTax, true)}</td>
+                                            {showDetails && (
+                                                <>
+                                                    <td className="text-red-400">{row.isAccumulation ? '—' : formatCurrency(row.niit, true)}</td>
+                                                    <td className="text-red-400">{row.isAccumulation ? '—' : formatCurrency(row.stateTax, true)}</td>
+                                                </>
+                                            )}
+                                            <td className="text-purple-400">{row.isAccumulation ? <span style={{color: '#6b7280'}}>—</span> : formatCurrency(row.healthCost, true)}</td>
+                                            {showDetails && (
+                                                <>
+                                                    <td className="text-gray-400 text-xs">{row.healthcareType}</td>
+                                                    <td className="text-purple-400">{row.acaCost > 0 ? formatCurrency(row.acaCost, true) : '-'}</td>
+                                                    <td className="text-purple-400">{row.medicareCost > 0 ? formatCurrency(row.medicareCost, true) : '-'}</td>
+                                                    <td className={row.irmaaTier !== 'None' && row.irmaaTier !== '' ? 'text-amber-400' : 'text-purple-400'}>
+                                                        {row.irmaaCost > 0 ? `${formatCurrency(row.irmaaCost, true)} (${row.irmaaTier})` : '-'}
+                                                    </td>
+                                                    <td className="text-purple-400">{formatCurrency(row.supplementalCost, true)}</td>
+                                                </>
+                                            )}
+                                            <td className={row.effectiveRate > 0.15 ? 'text-amber-400' : 'text-green-400'}>
+                                                {(row.effectiveRate * 100).toFixed(0)}%
+                                            </td>
+                                            <td className={row.shortfall > 0 ? 'text-red-400 font-bold' : 'font-bold'}>
+                                                {formatCurrency(row.netIncome, true)}
+                                            </td>
+                                            {showDetails && <td className="text-blue-400">{formatCurrency(row.conv, true)}</td>}
+                                            <td>{formatCurrency(row.brkEnd, true)}</td>
+                                            <td>{formatCurrency(row.t401kEnd, true)}</td>
+                                            <td>{formatCurrency(row.rothEnd, true)}</td>
+                                            {showDetails && <td>{formatCurrency(row.hsaEnd, true)}</td>}
+                                            <td className="font-semibold text-green-400">{formatCurrency(row.totalBalance, true)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    {/* Footer Notes */}
+                    <div className="mt-6 text-xs text-gray-500 space-y-1">
+                        <p>* NIIT thresholds ($250K MFJ / $200K single) are not inflation-indexed per IRS rules.</p>
+                        <p>* SS taxation uses proper 0%/50%/85% brackets based on provisional income.</p>
+                        <p>* Standard deduction includes age 65+ bonus ($1,550-$1,950 per qualifying person).</p>
+                        <p>* Healthcare costs are estimates. ACA subsidies may change. IRMAA is based on 2-year lookback.</p>
+                        <p>* This is a planning tool, not financial advice. Consult a qualified financial advisor.</p>
+                    </div>
+                </div>
+            );
+        };
+        
+        ReactDOM.render(<RetirementOptimizer />, document.getElementById('root'));
+    </script>
+</body>
+</html>
