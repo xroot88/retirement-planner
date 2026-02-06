@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+<!--
+    Retirement Tax Optimizer
+    Version: 2.0.0
+    Last Updated: 2026-02-05
+    
+    VERSION UPDATE INSTRUCTIONS:
+    When making changes, update the version number below and in the footer (search for "Version 2.0.0"):
+    - Major changes (new features, breaking changes): increment first number (2.0.0 → 3.0.0)
+    - Minor changes (enhancements, non-breaking updates): increment second number (2.0.0 → 2.1.0)
+    - Bug fixes: increment third number (2.0.0 → 2.0.1)
+    Always update the date to the current date when making changes.
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -66,11 +78,12 @@
         button {
             font-family: 'DM Sans', sans-serif;
             font-weight: 600;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 8px;
             border: none;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 14px;
         }
         
         .btn-primary {
@@ -167,8 +180,8 @@
         .stat-card {
             background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-tertiary) 100%);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px 20px;
+            border-radius: 8px;
+            padding: 8px 12px;
         }
         
         .section-title {
@@ -700,9 +713,9 @@
                 
                 // Account balances
                 brokerageStart: 1000000,
-                traditional401kStart: 1500000,
-                roth401kStart: 500000,
-                hsaStart: 75000,
+                traditional401kStart: 1485000,
+                roth401kStart: 485000,
+                hsaStart: 84000,
                 brokerageBasisPercent: 50,
                 
                 // Ages & Timeline
@@ -1923,46 +1936,44 @@
             // ============ RENDER ============
             return (
                 <div className="min-h-screen p-4 md:p-6 max-w-7xl mx-auto fade-in">
-                    {/* Header */}
-                    <div className="mb-6">
-                        <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">
-                            Retirement Tax Optimizer
-                        </h1>
-                        <p className="text-gray-400">
-                            Advanced projection with tax-optimized withdrawal strategy
-                        </p>
-                    </div>
-                    
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
-                        <div className="stat-card">
-                            <div className="text-xs text-gray-400 uppercase tracking-wide">Lifetime Tax</div>
-                            <div className="text-xl font-bold text-red-400 mono">{formatCurrency(summary.tax, true)}</div>
+                    {/* Compact Header + Summary */}
+                    <div className="mb-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <div>
+                                <h1 className="text-xl md:text-2xl font-bold text-white mb-0">
+                                    Retirement Tax Optimizer
+                                </h1>
+                                <p className="text-xs text-gray-400">
+                                    Advanced projection with tax-optimized withdrawal strategy
+                                </p>
+                            </div>
                         </div>
-                        <div className="stat-card">
-                            <div className="text-xs text-gray-400 uppercase tracking-wide">Avg Tax Rate</div>
-                            <div className="text-xl font-bold text-amber-400 mono">{(summary.avgEffectiveRate * 100).toFixed(1)}%</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="text-xs text-gray-400 uppercase tracking-wide">Healthcare</div>
-                            <div className="text-xl font-bold text-purple-400 mono">{formatCurrency(summary.health, true)}</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="text-xs text-gray-400 uppercase tracking-wide">Conversions</div>
-                            <div className="text-xl font-bold text-blue-400 mono">{formatCurrency(summary.conv, true)}</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="text-xs text-gray-400 uppercase tracking-wide">Final Balance</div>
-                            <div className="text-xl font-bold text-green-400 mono">{formatCurrency(summary.finalBalance, true)}</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="text-xs text-gray-400 uppercase tracking-wide">Years</div>
-                            <div className="text-xl font-bold text-gray-300 mono">{summary.years}</div>
+                        
+                        {/* Summary - Compact Table */}
+                        <div style={{marginLeft: '20px', marginRight: '20px', overflowX: 'auto'}}>
+                            <table style={{fontSize: '12px', borderCollapse: 'separate', borderSpacing: 0}}>
+                                <tbody>
+                                    <tr>
+                                        <td style={{padding: '6px 12px', color: '#9ca3af', whiteSpace: 'nowrap'}}>Lifetime Tax</td>
+                                        <td className="mono" style={{padding: '6px 12px', color: '#f87171', fontWeight: '600', whiteSpace: 'nowrap'}}>{formatCurrency(summary.tax, true)}</td>
+                                        <td style={{padding: '6px 12px', color: '#9ca3af', whiteSpace: 'nowrap'}}>Avg Tax Rate</td>
+                                        <td className="mono" style={{padding: '6px 12px', color: '#fbbf24', fontWeight: '600', whiteSpace: 'nowrap'}}>{(summary.avgEffectiveRate * 100).toFixed(1)}%</td>
+                                        <td style={{padding: '6px 12px', color: '#9ca3af', whiteSpace: 'nowrap'}}>Healthcare</td>
+                                        <td className="mono" style={{padding: '6px 12px', color: '#c084fc', fontWeight: '600', whiteSpace: 'nowrap'}}>{formatCurrency(summary.health, true)}</td>
+                                        <td style={{padding: '6px 12px', color: '#9ca3af', whiteSpace: 'nowrap'}}>Roth Conversions</td>
+                                        <td className="mono" style={{padding: '6px 12px', color: '#60a5fa', fontWeight: '600', whiteSpace: 'nowrap'}}>{formatCurrency(summary.conv, true)}</td>
+                                        <td style={{padding: '6px 12px', color: '#9ca3af', whiteSpace: 'nowrap'}}>Final Balance</td>
+                                        <td className="mono" style={{padding: '6px 12px', color: '#34d399', fontWeight: '600', whiteSpace: 'nowrap'}}>{formatCurrency(summary.finalBalance, true)}</td>
+                                        <td style={{padding: '6px 12px', color: '#9ca3af', whiteSpace: 'nowrap'}}>Plan Years</td>
+                                        <td className="mono" style={{padding: '6px 12px', color: '#d1d5db', fontWeight: '600', whiteSpace: 'nowrap'}}>{summary.years}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                     
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div className="flex flex-wrap gap-2 mb-4">
                         <button 
                             onClick={() => setShowInputs(!showInputs)} 
                             className={showInputs ? "btn-primary" : "btn-secondary"}
@@ -2006,7 +2017,7 @@
                     
                     {/* Monte Carlo Simulation Panel */}
                     {showMonteCarlo && monteCarloResults && (
-                        <div className="card mb-6 fade-in" style={{background: 'linear-gradient(135deg, #1e2a3a 0%, #1a2332 100%)'}}>
+                        <div className="card mb-6 fade-in" style={{background: 'linear-gradient(135deg, #1e2a3a 0%, #1a2332 100%)', marginLeft: '20px', marginRight: '20px'}}>
                             <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px'}}>
                                 <span style={{fontSize: '20px'}}>🎲</span>
                                 <h3 style={{color: 'white', fontSize: '16px', fontWeight: '600', margin: 0}}>
@@ -2252,7 +2263,7 @@
                     
                     {/* Guardrails Analysis Panel */}
                     {showGuardrails && guardrailsAnalysis && (
-                        <div className="card mb-6 fade-in" style={{background: 'linear-gradient(135deg, #1e2a3a 0%, #1a2332 100%)'}}>
+                        <div className="card mb-6 fade-in" style={{background: 'linear-gradient(135deg, #1e2a3a 0%, #1a2332 100%)', marginLeft: '20px', marginRight: '20px'}}>
                             <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px'}}>
                                 <span style={{fontSize: '20px'}}>📊</span>
                                 <h3 style={{color: 'white', fontSize: '16px', fontWeight: '600', margin: 0}}>
@@ -2362,7 +2373,7 @@
                     
                     {/* Roth Conversion Sweet Spot Analysis */}
                     {showSweetSpot && conversionAnalysis && (
-                        <div className="card mb-6 fade-in" style={{background: 'linear-gradient(135deg, #1e2a3a 0%, #1a2332 100%)'}}>
+                        <div className="card mb-6 fade-in" style={{background: 'linear-gradient(135deg, #1e2a3a 0%, #1a2332 100%)', marginLeft: '20px', marginRight: '20px'}}>
                             <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px'}}>
                                 <span style={{fontSize: '20px'}}>🎯</span>
                                 <h3 style={{color: 'white', fontSize: '16px', fontWeight: '600', margin: 0}}>
@@ -2483,7 +2494,7 @@
 
                     {/* Inputs Panel + Chart */}
                     {showInputs && (
-                        <div className="card mb-6 fade-in">
+                        <div className="card mb-6 fade-in" style={{marginLeft: '20px', marginRight: '20px'}}>
                             <div style={{display: 'flex', flexDirection: 'row', gap: '24px'}}>
                                 {/* Left side: Compact form fields */}
                                 <div style={{width: '420px', flexShrink: 0}}>
@@ -2746,7 +2757,7 @@
                     
                     {/* Alerts */}
                     {summary.shortfall > 0 && (
-                        <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mb-6">
+                        <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mb-6" style={{marginLeft: '20px', marginRight: '20px'}}>
                             <div className="font-semibold text-red-400">⚠️ Funding Shortfall Detected</div>
                             <div className="text-sm text-red-300">
                                 Your plan shows {formatCurrency(summary.shortfall)} in total shortfalls. 
@@ -2756,7 +2767,7 @@
                     )}
                     
                     {/* Data Table */}
-                    <div className="card overflow-hidden">
+                    <div className="card overflow-hidden" style={{marginLeft: '20px', marginRight: '20px'}}>
                         <div className="overflow-x-auto max-h-[600px]">
                             <table>
                                 <thead>
@@ -2855,6 +2866,11 @@
                         <p>* Standard deduction includes age 65+ bonus ($1,550-$1,950 per qualifying person).</p>
                         <p>* Healthcare costs are estimates. ACA subsidies may change. IRMAA is based on 2-year lookback.</p>
                         <p>* This is a planning tool, not financial advice. Consult a qualified financial advisor.</p>
+                    </div>
+                    
+                    {/* Version */}
+                    <div className="mt-4 text-center text-xs text-gray-600">
+                        Version 2.0.0 (2026-02-05)
                     </div>
                 </div>
             );
