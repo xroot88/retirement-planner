@@ -713,9 +713,9 @@
                 
                 // Account balances
                 brokerageStart: 1000000,
-                traditional401kStart: 1485000,
-                roth401kStart: 485000,
-                hsaStart: 84000,
+                traditional401kStart: 1500000,
+                roth401kStart: 500000,
+                hsaStart: 100000,
                 brokerageBasisPercent: 50,
                 
                 // Ages & Timeline
@@ -839,9 +839,11 @@
                 // Calculate years between today and retirement start (accumulation phase)
                 const accumulationYears = Math.max(0, inputs.startYear - inputs.todayYear);
                 
-                // Calculate ages at today vs retirement
-                const yourAgeToday = inputs.yourAgeStart - accumulationYears;
-                const spouseAgeToday = inputs.spouseAgeStart - accumulationYears;
+                // yourAgeStart and spouseAgeStart are the user's CURRENT age (today)
+                const yourAgeToday = inputs.yourAgeStart;
+                const spouseAgeToday = inputs.spouseAgeStart;
+                const yourAgeAtRetirement = inputs.yourAgeStart + accumulationYears;
+                const spouseAgeAtRetirement = inputs.spouseAgeStart + accumulationYears;
                 
                 // Apply accumulation phase growth (no withdrawals, just market returns)
                 // AND add rows to the data output
@@ -928,15 +930,15 @@
                     });
                 }
                 
-                const yourDeathYear = inputs.startYear + (inputs.yourDeathAge - inputs.yourAgeStart);
-                const spouseDeathYear = isSingleFiler ? 0 : inputs.startYear + (inputs.spouseDeathAge - inputs.spouseAgeStart);
+                const yourDeathYear = inputs.startYear + (inputs.yourDeathAge - yourAgeAtRetirement);
+                const spouseDeathYear = isSingleFiler ? 0 : inputs.startYear + (inputs.spouseDeathAge - spouseAgeAtRetirement);
                 const endYear = isSingleFiler ? yourDeathYear : Math.max(yourDeathYear, spouseDeathYear);
                 const totalYears = endYear - inputs.startYear + 1;
                 
                 for (let yr = 0; yr < totalYears; yr++) {
                     const calYear = inputs.startYear + yr;
-                    const yourAge = inputs.yourAgeStart + yr;
-                    const spouseAge = isSingleFiler ? null : inputs.spouseAgeStart + yr;
+                    const yourAge = yourAgeAtRetirement + yr;
+                    const spouseAge = isSingleFiler ? null : spouseAgeAtRetirement + yr;
                     const youAlive = calYear <= yourDeathYear;
                     const spouseAlive = isSingleFiler ? false : calYear <= spouseDeathYear;
                     
@@ -970,15 +972,15 @@
                     if (youAlive && yourAge >= inputs.yourSSStartAge) {
                         // COLA applies from start year, not from today
                         const yearsCollecting = yourAge - inputs.yourSSStartAge;
-                        const startYearFromNow = inputs.yourSSStartAge - inputs.yourAgeStart;
+                        const startYearFromNow = inputs.yourSSStartAge - yourAgeAtRetirement;
                         const colaFactor = Math.pow(1 + inputs.inflationRate / 100, startYearFromNow + yearsCollecting);
                         yourSS = inputs.yourSSMonthly * 12 * colaFactor;
                     }
-                    
+
                     // Spouse SS (only if married filing and spouse alive and past start age)
                     if (!isSingleFiler && spouseAlive && spouseAge >= inputs.spouseSSStartAge) {
                         const yearsCollecting = spouseAge - inputs.spouseSSStartAge;
-                        const startYearFromNow = inputs.spouseSSStartAge - inputs.spouseAgeStart;
+                        const startYearFromNow = inputs.spouseSSStartAge - spouseAgeAtRetirement;
                         const colaFactor = Math.pow(1 + inputs.inflationRate / 100, startYearFromNow + yearsCollecting);
                         spouseSS = inputs.spouseSSMonthly * 12 * colaFactor;
                     }
